@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/hashicorp/terraform/helper/schema"
-	contentful "github.com/tolgaakyuz/contentful-go"
+	contentful "github.com/labd/contentful-go"
 )
 
 func resourceContentfulWebhook() *schema.Resource {
@@ -13,38 +13,38 @@ func resourceContentfulWebhook() *schema.Resource {
 		Delete: resourceDeleteWebhook,
 
 		Schema: map[string]*schema.Schema{
-			"version": &schema.Schema{
+			"version": {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
-			"space_id": &schema.Schema{
+			"space_id": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"name": &schema.Schema{
+			"name": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
 			// Webhook specific props
-			"url": &schema.Schema{
+			"url": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"http_basic_auth_username": &schema.Schema{
+			"http_basic_auth_username": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Default:  "",
 			},
-			"http_basic_auth_password": &schema.Schema{
+			"http_basic_auth_password": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Default:  "",
 			},
-			"headers": &schema.Schema{
+			"headers": {
 				Type:     schema.TypeMap,
 				Optional: true,
 			},
-			"topics": &schema.Schema{
+			"topics": {
 				Type: schema.TypeList,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
@@ -57,7 +57,7 @@ func resourceContentfulWebhook() *schema.Resource {
 }
 
 func resourceCreateWebhook(d *schema.ResourceData, m interface{}) (err error) {
-	client := m.(*contentful.Contentful)
+	client := m.(*contentful.Client)
 	spaceID := d.Get("space_id").(string)
 
 	webhook := &contentful.Webhook{
@@ -85,7 +85,7 @@ func resourceCreateWebhook(d *schema.ResourceData, m interface{}) (err error) {
 }
 
 func resourceUpdateWebhook(d *schema.ResourceData, m interface{}) (err error) {
-	client := m.(*contentful.Contentful)
+	client := m.(*contentful.Client)
 	spaceID := d.Get("space_id").(string)
 	webhookID := d.Id()
 
@@ -117,7 +117,7 @@ func resourceUpdateWebhook(d *schema.ResourceData, m interface{}) (err error) {
 }
 
 func resourceReadWebhook(d *schema.ResourceData, m interface{}) error {
-	client := m.(*contentful.Contentful)
+	client := m.(*contentful.Client)
 	spaceID := d.Get("space_id").(string)
 	webhookID := d.Id()
 
@@ -135,7 +135,7 @@ func resourceReadWebhook(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceDeleteWebhook(d *schema.ResourceData, m interface{}) (err error) {
-	client := m.(*contentful.Contentful)
+	client := m.(*contentful.Client)
 	spaceID := d.Get("space_id").(string)
 	webhookID := d.Id()
 
@@ -197,7 +197,7 @@ func setWebhookProperties(d *schema.ResourceData, webhook *contentful.Webhook) (
 }
 
 func transformHeadersToContentfulFormat(headersTerraform interface{}) []*contentful.WebhookHeader {
-	headers := []*contentful.WebhookHeader{}
+	var headers []*contentful.WebhookHeader
 
 	for k, v := range headersTerraform.(map[string]interface{}) {
 		headers = append(headers, &contentful.WebhookHeader{

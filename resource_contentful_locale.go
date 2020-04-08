@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/hashicorp/terraform/helper/schema"
-	contentful "github.com/tolgaakyuz/contentful-go"
+	contentful "github.com/labd/contentful-go"
 )
 
 func resourceContentfulLocale() *schema.Resource {
@@ -13,38 +13,38 @@ func resourceContentfulLocale() *schema.Resource {
 		Delete: resourceDeleteLocale,
 
 		Schema: map[string]*schema.Schema{
-			"version": &schema.Schema{
+			"version": {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
-			"space_id": &schema.Schema{
+			"space_id": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"name": &schema.Schema{
+			"name": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"code": &schema.Schema{
+			"code": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"fallback_code": &schema.Schema{
+			"fallback_code": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Default:  "en-US",
 			},
-			"optional": &schema.Schema{
+			"optional": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  false,
 			},
-			"cda": &schema.Schema{
+			"cda": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  true,
 			},
-			"cma": &schema.Schema{
+			"cma": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  false,
@@ -54,7 +54,7 @@ func resourceContentfulLocale() *schema.Resource {
 }
 
 func resourceCreateLocale(d *schema.ResourceData, m interface{}) (err error) {
-	client := m.(*contentful.Contentful)
+	client := m.(*contentful.Client)
 	spaceID := d.Get("space_id").(string)
 
 	locale := &contentful.Locale{
@@ -82,7 +82,7 @@ func resourceCreateLocale(d *schema.ResourceData, m interface{}) (err error) {
 }
 
 func resourceReadLocale(d *schema.ResourceData, m interface{}) error {
-	client := m.(*contentful.Contentful)
+	client := m.(*contentful.Client)
 	spaceID := d.Get("space_id").(string)
 	localeID := d.Id()
 
@@ -100,7 +100,7 @@ func resourceReadLocale(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceUpdateLocale(d *schema.ResourceData, m interface{}) (err error) {
-	client := m.(*contentful.Contentful)
+	client := m.(*contentful.Client)
 	spaceID := d.Get("space_id").(string)
 	localeID := d.Id()
 
@@ -130,7 +130,7 @@ func resourceUpdateLocale(d *schema.ResourceData, m interface{}) (err error) {
 }
 
 func resourceDeleteLocale(d *schema.ResourceData, m interface{}) (err error) {
-	client := m.(*contentful.Contentful)
+	client := m.(*contentful.Client)
 	spaceID := d.Get("space_id").(string)
 	localeID := d.Id()
 

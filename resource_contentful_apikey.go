@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/hashicorp/terraform/helper/schema"
-	contentful "github.com/tolgaakyuz/contentful-go"
+	contentful "github.com/labd/contentful-go"
 )
 
 func resourceContentfulAPIKey() *schema.Resource {
@@ -13,19 +13,19 @@ func resourceContentfulAPIKey() *schema.Resource {
 		Delete: resourceDeleteAPIKey,
 
 		Schema: map[string]*schema.Schema{
-			"version": &schema.Schema{
+			"version": {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
-			"space_id": &schema.Schema{
+			"space_id": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"name": &schema.Schema{
+			"name": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"description": &schema.Schema{
+			"description": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
@@ -34,7 +34,7 @@ func resourceContentfulAPIKey() *schema.Resource {
 }
 
 func resourceCreateAPIKey(d *schema.ResourceData, m interface{}) (err error) {
-	client := m.(*contentful.Contentful)
+	client := m.(*contentful.Client)
 
 	apiKey := &contentful.APIKey{
 		Name:        d.Get("name").(string),
@@ -56,7 +56,7 @@ func resourceCreateAPIKey(d *schema.ResourceData, m interface{}) (err error) {
 }
 
 func resourceUpdateAPIKey(d *schema.ResourceData, m interface{}) (err error) {
-	client := m.(*contentful.Contentful)
+	client := m.(*contentful.Client)
 	spaceID := d.Get("space_id").(string)
 	apiKeyID := d.Id()
 
@@ -83,7 +83,7 @@ func resourceUpdateAPIKey(d *schema.ResourceData, m interface{}) (err error) {
 }
 
 func resourceReadAPIKey(d *schema.ResourceData, m interface{}) (err error) {
-	client := m.(*contentful.Contentful)
+	client := m.(*contentful.Client)
 	spaceID := d.Get("space_id").(string)
 	apiKeyID := d.Id()
 
@@ -97,7 +97,7 @@ func resourceReadAPIKey(d *schema.ResourceData, m interface{}) (err error) {
 }
 
 func resourceDeleteAPIKey(d *schema.ResourceData, m interface{}) (err error) {
-	client := m.(*contentful.Contentful)
+	client := m.(*contentful.Client)
 	spaceID := d.Get("space_id").(string)
 	apiKeyID := d.Id()
 

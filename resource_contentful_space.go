@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/hashicorp/terraform/helper/schema"
-	contentful "github.com/tolgaakyuz/contentful-go"
+	contentful "github.com/labd/contentful-go"
 )
 
 func resourceContentfulSpace() *schema.Resource {
@@ -13,16 +13,16 @@ func resourceContentfulSpace() *schema.Resource {
 		Delete: resourceSpaceDelete,
 
 		Schema: map[string]*schema.Schema{
-			"version": &schema.Schema{
+			"version": {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
-			"name": &schema.Schema{
+			"name": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
 			// Space specific props
-			"default_locale": &schema.Schema{
+			"default_locale": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Default:  "en",
@@ -32,7 +32,7 @@ func resourceContentfulSpace() *schema.Resource {
 }
 
 func resourceSpaceCreate(d *schema.ResourceData, m interface{}) (err error) {
-	client := m.(*contentful.Contentful)
+	client := m.(*contentful.Client)
 
 	space := &contentful.Space{
 		Name:          d.Get("name").(string),
@@ -55,7 +55,7 @@ func resourceSpaceCreate(d *schema.ResourceData, m interface{}) (err error) {
 }
 
 func resourceSpaceRead(d *schema.ResourceData, m interface{}) error {
-	client := m.(*contentful.Contentful)
+	client := m.(*contentful.Client)
 	spaceID := d.Id()
 
 	_, err := client.Spaces.Get(spaceID)
@@ -68,7 +68,7 @@ func resourceSpaceRead(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceSpaceUpdate(d *schema.ResourceData, m interface{}) (err error) {
-	client := m.(*contentful.Contentful)
+	client := m.(*contentful.Client)
 	spaceID := d.Id()
 
 	space, err := client.Spaces.Get(spaceID)
@@ -87,7 +87,7 @@ func resourceSpaceUpdate(d *schema.ResourceData, m interface{}) (err error) {
 }
 
 func resourceSpaceDelete(d *schema.ResourceData, m interface{}) (err error) {
-	client := m.(*contentful.Contentful)
+	client := m.(*contentful.Client)
 	spaceID := d.Id()
 
 	space, err := client.Spaces.Get(spaceID)

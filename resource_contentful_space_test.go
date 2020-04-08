@@ -6,7 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
-	contentful "github.com/tolgaakyuz/contentful-go"
+	contentful "github.com/labd/contentful-go"
 )
 
 func TestAccContentfulSpace_Basic(t *testing.T) {
@@ -16,12 +16,12 @@ func TestAccContentfulSpace_Basic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckContentfulSpaceDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccContentfulSpaceConfig,
 				Check: resource.TestCheckResourceAttr(
 					"contentful_space.myspace", "name", "TF Acc Test Space"),
 			},
-			resource.TestStep{
+			{
 				Config: testAccContentfulSpaceUpdateConfig,
 				Check: resource.TestCheckResourceAttr(
 					"contentful_space.myspace", "name", "TF Acc Test Changed Space"),
@@ -31,7 +31,7 @@ func TestAccContentfulSpace_Basic(t *testing.T) {
 }
 
 func testAccCheckContentfulSpaceDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*contentful.Contentful)
+	client := testAccProvider.Meta().(*contentful.Client)
 
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "contentful_space" {
@@ -40,7 +40,7 @@ func testAccCheckContentfulSpaceDestroy(s *terraform.State) error {
 
 		space, err := client.Spaces.Get(rs.Primary.ID)
 		if err == nil {
-			return fmt.Errorf("Space %s still exists after destroy", space.Sys.ID)
+			return fmt.Errorf("space %s still exists after destroy", space.Sys.ID)
 		}
 	}
 
