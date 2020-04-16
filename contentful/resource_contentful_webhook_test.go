@@ -131,13 +131,8 @@ func testAccContentfulWebhookDestroy(s *terraform.State) error {
 }
 
 var testAccContentfulWebhookConfig = `
-resource "contentful_space" "myspace" {
-  name = "space-name"
-}
-
 resource "contentful_webhook" "mywebhook" {
-  space_id = "${contentful_space.myspace.id}"
-  depends_on = ["contentful_space.myspace"]
+  space_id = "uhwvl4veejyj"
 
   name = "webhook-name"
   url=  "https://www.example.com/test"
@@ -145,7 +140,7 @@ resource "contentful_webhook" "mywebhook" {
 	"Entry.create",
 	"ContentType.create",
   ]
-  headers {
+  headers = {
 	header1 = "header1-value"
     header2 = "header2-value"
   }
@@ -155,13 +150,8 @@ resource "contentful_webhook" "mywebhook" {
 `
 
 var testAccContentfulWebhookUpdateConfig = `
-resource "contentful_space" "myspace" {
-  name = "space-name"
-}
-
 resource "contentful_webhook" "mywebhook" {
-  depends_on = ["contentful_space.myspace"]
-  space_id = "${contentful_space.myspace.id}"
+  space_id = "uhwvl4veejyj"
 
   name = "webhook-name-updated"
   url=  "https://www.example.com/test-updated"
