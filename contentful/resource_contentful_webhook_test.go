@@ -22,6 +22,7 @@ func TestAccContentfulWebhook_Basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckContentfulWebhookExists("contentful_webhook.mywebhook", &webhook),
 					testAccCheckContentfulWebhookAttributes(&webhook, map[string]interface{}{
+						"space_id":                 spaceID,
 						"name":                     "webhook-name",
 						"url":                      "https://www.example.com/test",
 						"http_basic_auth_username": "username",
@@ -33,6 +34,7 @@ func TestAccContentfulWebhook_Basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckContentfulWebhookExists("contentful_webhook.mywebhook", &webhook),
 					testAccCheckContentfulWebhookAttributes(&webhook, map[string]interface{}{
+						"space_id":                 spaceID,
 						"name":                     "webhook-name-updated",
 						"url":                      "https://www.example.com/test-updated",
 						"http_basic_auth_username": "username-updated",
@@ -132,7 +134,7 @@ func testAccContentfulWebhookDestroy(s *terraform.State) error {
 
 var testAccContentfulWebhookConfig = `
 resource "contentful_webhook" "mywebhook" {
-  space_id = "uhwvl4veejyj"
+  space_id = "` + spaceID + `"
 
   name = "webhook-name"
   url=  "https://www.example.com/test"
@@ -151,7 +153,8 @@ resource "contentful_webhook" "mywebhook" {
 
 var testAccContentfulWebhookUpdateConfig = `
 resource "contentful_webhook" "mywebhook" {
-  space_id = "uhwvl4veejyj"
+  space_id = "` + spaceID + `"
+
 
   name = "webhook-name-updated"
   url=  "https://www.example.com/test-updated"

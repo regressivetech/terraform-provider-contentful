@@ -26,6 +26,7 @@ func TestAccContentfulAPIKey_Basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckContentfulAPIKeyExists("contentful_apikey.myapikey", &apiKey),
 					testAccCheckContentfulAPIKeyAttributes(&apiKey, map[string]interface{}{
+						"space_id":    spaceID,
 						"name":        name,
 						"description": description,
 					}),
@@ -36,6 +37,7 @@ func TestAccContentfulAPIKey_Basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckContentfulAPIKeyExists("contentful_apikey.myapikey", &apiKey),
 					testAccCheckContentfulAPIKeyAttributes(&apiKey, map[string]interface{}{
+						"space_id":    spaceID,
 						"name":        fmt.Sprintf("%s-updated", name),
 						"description": fmt.Sprintf("%s-updated", description),
 					}),
@@ -124,21 +126,21 @@ func testAccContentfulAPIKeyDestroy(s *terraform.State) error {
 func testAccContentfulAPIKeyConfig(name, description string) string {
 	return fmt.Sprintf(`
 resource "contentful_apikey" "myapikey" {
-  space_id = "uhwvl4veejyj"
+  space_id = "%s"
 
   name = "%s"
   description = "%s"
 }
-`, name, description)
+`, spaceID, name, description)
 }
 
 func testAccContentfulAPIKeyUpdateConfig(name, description string) string {
 	return fmt.Sprintf(`
 resource "contentful_apikey" "myapikey" {
-  space_id = "uhwvl4veejyj"
+  space_id = "%s"
 
   name = "%s-updated"
   description = "%s-updated"
 }
-`, name, description)
+`, spaceID, name, description)
 }
