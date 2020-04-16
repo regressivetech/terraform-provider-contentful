@@ -90,7 +90,7 @@ func testAccCheckContentfulContentTypeDestroy(s *terraform.State) (err error) {
 
 var testAccContentfulContentTypeConfig = `
 resource "contentful_contenttype" "mycontenttype" {
-  space_id = "uhwvl4veejyj"
+  space_id = "` + spaceID + `"
   name = "TF Acc Test CT 1"
   description = "Terraform Acc Test Content Type"
   display_field = "field1"
@@ -117,7 +117,7 @@ resource "contentful_contenttype" "mycontenttype" {
 
 var testAccContentfulContentTypeUpdateConfig = `
 resource "contentful_contenttype" "mycontenttype" {
-  space_id = "uhwvl4veejyj"
+  space_id = "` + spaceID + `"
   name = "TF Acc Test CT name change"
   description = "Terraform Acc Test Content Type description change"
   display_field = "field1"
@@ -144,7 +144,7 @@ resource "contentful_contenttype" "mycontenttype" {
 
 var testAccContentfulContentTypeLinkConfig = `
 resource "contentful_contenttype" "mycontenttype" {
-  space_id = "uhwvl4veejyj"
+  space_id = "` + spaceID + `"
   name = "TF Acc Test CT name change"
   description = "Terraform Acc Test Content Type description change"
   display_field = "field1"
@@ -169,7 +169,7 @@ resource "contentful_contenttype" "mycontenttype" {
 }
 
 resource "contentful_contenttype" "mylinked_contenttype" {
-  space_id      = "uhwvl4veejyj"
+  space_id = "` + spaceID + `"
   name          = "TF Acc Test Linked CT"
   description   = "Terraform Acc Test Content Type with links"
   display_field = "asset_field"

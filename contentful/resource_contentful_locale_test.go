@@ -22,6 +22,7 @@ func TestAccContentfulLocales_Basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckContentfulLocaleExists("contentful_locale.mylocale", &locale),
 					testAccCheckContentfulLocaleAttributes(&locale, map[string]interface{}{
+						"space_id":      spaceID,
 						"name":          "locale-name",
 						"code":          "de",
 						"fallback_code": "en-US",
@@ -36,6 +37,7 @@ func TestAccContentfulLocales_Basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckContentfulLocaleExists("contentful_locale.mylocale", &locale),
 					testAccCheckContentfulLocaleAttributes(&locale, map[string]interface{}{
+						"space_id":      spaceID,
 						"name":          "locale-name-updated",
 						"code":          "es",
 						"fallback_code": "en-US",
@@ -146,7 +148,7 @@ func testAccContentfulLocaleDestroy(s *terraform.State) error {
 
 var testAccContentfulLocaleConfig = `
 resource "contentful_locale" "mylocale" {
-  space_id = "uhwvl4veejyj"
+  space_id = "` + spaceID + `"
 
   name = "locale-name"
   code = "de"
@@ -159,7 +161,7 @@ resource "contentful_locale" "mylocale" {
 
 var testAccContentfulLocaleUpdateConfig = `
 resource "contentful_locale" "mylocale" {
-  space_id = "uhwvl4veejyj"
+  space_id = "` + spaceID + `"
 
   name = "locale-name-updated"
   code = "es"
