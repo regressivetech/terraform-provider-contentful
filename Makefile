@@ -1,21 +1,27 @@
-GO_CMD=go
-GO_BUILD=$(GO_CMD) build
-GO_BUILD_RACE=$(GO_CMD) build -race
-GO_TEST=$(GO_CMD) test
-GO_TEST_VERBOSE=$(GO_CMD) test -v
-GO_INSTALL=$(GO_CMD) install -v
-GO_CLEAN=$(GO_CMD) clean
-GO_DEPS=$(GO_CMD) get -d -v
-GO_DEPS_UPDATE=$(GO_CMD) get -d -v -u
-GO_VET=$(GO_CMD) vet
-GO_FMT=$(GO_CMD) fmt
+GOCMD=go
+CMT=$(GOCMD) os.Getenv("CONTENTFUL_MANAGEMENT_TOKEN")
 
-.PHONY: all test format dep
 
-all: dep test format
+.PHONY: build
+build:
+	sudo -S docker build -t terraform-provider-contentful -f Dockerfile-test .
 
-test:
-	./tools/test.sh
+.PHONY: test-unit
+test-unit: build
+	sudo docker run \
+		-e CONTENTFUL_MANAGEMENT_TOKEN=${CONTENTFUL_MANAGEMENT_TOKEN} \
+		-e CONTENTFUL_ORGANIZATION_ID=${CONTENTFUL_ORGANIZATION_ID} \
+		-e SPACE_ID=${SPACE_ID} \
+		-e "TF_ACC=true" \
+		terraform-provider-contentful \
+		go test ./... -v
 
-format:
-	go fmt
+.PHONY: interactive
+interactive:
+	sudo -S docker run -it \
+		-v $(shell pwd):/go/src/github.com/labd/terraform-contentful \
+		-e CONTENTFUL_MANAGEMENT_TOKEN=${CONTENTFUL_MANAGEMENT_TOKEN} \
+        -e CONTENTFUL_ORGANIZATION_ID=${CONTENTFUL_ORGANIZATION_ID} \
+        -e SPACE_ID=${SPACE_ID} \
+		terraform-provider-contentful \
+		bash
