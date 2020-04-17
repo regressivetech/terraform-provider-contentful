@@ -1,7 +1,3 @@
-GOCMD=go
-CMT=$(GOCMD) os.Getenv("CONTENTFUL_MANAGEMENT_TOKEN")
-
-
 .PHONY: build
 build:
 	sudo -S docker build -t terraform-provider-contentful -f Dockerfile-test .
