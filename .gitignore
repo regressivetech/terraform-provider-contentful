@@ -13,7 +13,7 @@ crash.log
 .vscode
 .idea
 
-/local/*
+local/
 !/local/*.example
 
 vendor/
