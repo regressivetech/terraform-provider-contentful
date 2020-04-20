@@ -1,4 +1,5 @@
-[![Build Status](https://img.shields.io/circleci/project/github/labd/terraform-contentful.svg?branch=master)](https://circleci.com/gh/labd/terraform-contentful)
+![Go](https://github.com/labd/terraform-contentful/workflows/Go/badge.svg?branch=master)
+[![codecov](https://codecov.io/gh/labd/terraform-contentful/branch/master/graph/badge.svg)](https://codecov.io/gh/labd/terraform-contentful)
 [![license](https://img.shields.io/github/license/contentful-labs/terraform-contentful.svg)](https://github.com/labd/terraform-contentful/blob/master/LICENSE)
 
 Terraform Provider for [Contentful's](https://www.contentful.com) Content Management API
