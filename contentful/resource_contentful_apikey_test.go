@@ -1,4 +1,4 @@
-package main
+package contentful
 
 import (
 	"fmt"
@@ -7,13 +7,12 @@ import (
 	"github.com/hashicorp/terraform/helper/acctest"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
-	contentful "github.com/tolgaakyuz/contentful-go"
+	contentful "github.com/labd/contentful-go"
 )
 
 func TestAccContentfulAPIKey_Basic(t *testing.T) {
 	var apiKey contentful.APIKey
 
-	spaceName := fmt.Sprintf("space-name-%s", acctest.RandString(3))
 	name := fmt.Sprintf("apikey-name-%s", acctest.RandString(3))
 	description := fmt.Sprintf("apikey-description-%s", acctest.RandString(3))
 
@@ -22,21 +21,23 @@ func TestAccContentfulAPIKey_Basic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccContentfulAPIKeyDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
-				Config: testAccContentfulAPIKeyConfig(spaceName, name, description),
+			{
+				Config: testAccContentfulAPIKeyConfig(name, description),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckContentfulAPIKeyExists("contentful_apikey.myapikey", &apiKey),
 					testAccCheckContentfulAPIKeyAttributes(&apiKey, map[string]interface{}{
+						"space_id":    spaceID,
 						"name":        name,
 						"description": description,
 					}),
 				),
 			},
-			resource.TestStep{
-				Config: testAccContentfulAPIKeyUpdateConfig(spaceName, name, description),
+			{
+				Config: testAccContentfulAPIKeyUpdateConfig(name, description),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckContentfulAPIKeyExists("contentful_apikey.myapikey", &apiKey),
 					testAccCheckContentfulAPIKeyAttributes(&apiKey, map[string]interface{}{
+						"space_id":    spaceID,
 						"name":        fmt.Sprintf("%s-updated", name),
 						"description": fmt.Sprintf("%s-updated", description),
 					}),
@@ -50,20 +51,20 @@ func testAccCheckContentfulAPIKeyExists(n string, apiKey *contentful.APIKey) res
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Not Found: %s", n)
+			return fmt.Errorf("not Found: %s", n)
 		}
 
 		spaceID := rs.Primary.Attributes["space_id"]
 		if spaceID == "" {
-			return fmt.Errorf("No space_id is set")
+			return fmt.Errorf("no space_id is set")
 		}
 
 		apiKeyID := rs.Primary.ID
 		if apiKeyID == "" {
-			return fmt.Errorf("No api key ID is set")
+			return fmt.Errorf("no api key ID is set")
 		}
 
-		client := testAccProvider.Meta().(*contentful.Contentful)
+		client := testAccProvider.Meta().(*contentful.Client)
 
 		contentfulAPIKey, err := client.APIKeys.Get(spaceID, apiKeyID)
 		if err != nil {
@@ -101,53 +102,45 @@ func testAccContentfulAPIKeyDestroy(s *terraform.State) error {
 		// get space id from resource data
 		spaceID := rs.Primary.Attributes["space_id"]
 		if spaceID == "" {
-			return fmt.Errorf("No space_id is set")
+			return fmt.Errorf("no space_id is set")
 		}
 
 		apiKeyID := rs.Primary.ID
 		if apiKeyID == "" {
-			return fmt.Errorf("No apikey ID is set")
+			return fmt.Errorf("no apikey ID is set")
 		}
 
-		client := testAccProvider.Meta().(*contentful.Contentful)
+		client := testAccProvider.Meta().(*contentful.Client)
 
 		_, err := client.APIKeys.Get(spaceID, apiKeyID)
 		if _, ok := err.(contentful.NotFoundError); ok {
 			return nil
 		}
 
-		return fmt.Errorf("Api Key still exists with id: %s", rs.Primary.ID)
+		return fmt.Errorf("api Key still exists with id: %s", rs.Primary.ID)
 	}
 
 	return nil
 }
 
-func testAccContentfulAPIKeyConfig(spaceName, name, description string) string {
+func testAccContentfulAPIKeyConfig(name, description string) string {
 	return fmt.Sprintf(`
-resource "contentful_space" "myspace" {
-  name = "%s"
-}
-
 resource "contentful_apikey" "myapikey" {
-  space_id = "${contentful_space.myspace.id}"
+  space_id = "%s"
 
   name = "%s"
   description = "%s"
 }
-`, spaceName, name, description)
+`, spaceID, name, description)
 }
 
-func testAccContentfulAPIKeyUpdateConfig(spaceName, name, description string) string {
+func testAccContentfulAPIKeyUpdateConfig(name, description string) string {
 	return fmt.Sprintf(`
-resource "contentful_space" "myspace" {
-  name = "%s"
-}
-
 resource "contentful_apikey" "myapikey" {
-  space_id = "${contentful_space.myspace.id}"
+  space_id = "%s"
 
   name = "%s-updated"
   description = "%s-updated"
 }
-`, spaceName, name, description)
+`, spaceID, name, description)
 }
