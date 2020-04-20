@@ -45,6 +45,7 @@ jobs:
     - name: Run tests
       run: go test -race -coverprofile=coverage.txt -covermode=atomic -coverpkg=./contentful -v ./contentful
       env:
+        TF_ACC: 1
         CONTENTFUL_ORGANIZATION_ID: ${{ secrets.CONTENTFUL_ORGANIZATION_ID }}
         CONTENTFUL_MANAGEMENT_TOKEN: ${{ secrets.CONTENTFUL_MANAGEMENT_TOKEN }}
         SPACE_ID: ${{ secrets.SPACE_ID }}
