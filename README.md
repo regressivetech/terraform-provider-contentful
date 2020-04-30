@@ -1,11 +1,10 @@
 ![Go](https://github.com/labd/terraform-contentful/workflows/Go/badge.svg?branch=master)
 [![codecov](https://codecov.io/gh/labd/terraform-contentful/branch/master/graph/badge.svg)](https://codecov.io/gh/labd/terraform-contentful)
-[![license](https://img.shields.io/github/license/contentful-labs/terraform-contentful.svg)](https://github.com/labd/terraform-contentful/blob/master/LICENSE)
+[![license](https://img.shields.io/github/license/labd/terraform-contentful.svg)](https://github.com/labd/terraform-contentful/blob/master/LICENSE)
 
 Terraform Provider for [Contentful's](https://www.contentful.com) Content Management API
 
 # About
-
 
 [Contentful](https://www.contentful.com) provides a content infrastructure for digital teams to power content in websites, apps, and devices. Unlike a CMS, Contentful was built to integrate with the modern software stack. It offers a central hub for structured content, powerful management and delivery APIs, and a customizable web app that enable developers and content creators to ship digital products faster.
 
@@ -15,10 +14,12 @@ Terraform Provider for [Contentful's](https://www.contentful.com) Content Manage
 
 Create, update and delete Contentful resources such as:
 - [x] Spaces
-- [ ] Content Types
+- [x] Content Types
 - [x] API Keys
 - [x] Webhooks
-- [ ] Locales
+- [x] Locales
+- [x] Environments
+- [ ] Organizations
 
 # Getting started
 
@@ -51,6 +52,10 @@ Build the binary
 
     $ go build -o terraform-provider-contentful
 
+*Or using make command*
+
+    $ make build
+
 Add it to your ~/.terraformrc (or %APPDATA%/terraform.rc for Windows)
 
     $ cat ~/.terraformrc
@@ -70,7 +75,7 @@ Use the provider by creating a main.tf file with:
 
 Run the terraform plan
 
-    terraform plan -out=contentful.plan
+    $ terraform plan -out=contentful.plan
 
 Check the changes
 ```
@@ -99,6 +104,10 @@ Plan: 1 to add, 0 to change, 0 to destroy.
 ```
 
 Apply the plan
+
+    $ terraform apply
+
+Check the Terraform output for warnings and errors
 ```
 contentful_space.test: Creating...
   default_locale: "" => "en"
@@ -118,11 +127,15 @@ State path:
 
 ## Testing
 
-    TF_ACC=1 go test -v
+    $ TF_ACC=1 go test -v
 
-To enable higher verbose mode
+To enable higher verbose mode:
 
-    TF_LOG=debug TF_ACC=1 go test -v
+    $ TF_LOG=debug TF_ACC=1 go test -v
+
+For testing, you can also make use of the make command:
+
+    $ make test-unit
 
 ## Documentation/References
 
