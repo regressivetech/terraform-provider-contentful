@@ -1,14 +1,12 @@
 package contentful
 
 import (
-	"os"
-
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/terraform"
 	contentful "github.com/labd/contentful-go"
 )
 
-// Provider does shit
+// Provider returns the Terraform Provider as a scheme and makes resources reachable
 func Provider() terraform.ResourceProvider {
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
@@ -31,16 +29,18 @@ func Provider() terraform.ResourceProvider {
 			"contentful_apikey":      resourceContentfulAPIKey(),
 			"contentful_webhook":     resourceContentfulWebhook(),
 			"contentful_locale":      resourceContentfulLocale(),
+			"contentful_environment": resourceContentfulEnvironment(),
 		},
 		ConfigureFunc: providerConfigure,
 	}
 }
 
+// providerConfigure sets the configuration for the Terraform Provider
 func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	cma := contentful.NewCMA(d.Get("cma_token").(string))
 	cma.SetOrganization(d.Get("organization_id").(string))
 
-	if os.Getenv("TF_LOG") != "" {
+	if logBoolean != "" {
 		cma.Debug = true
 	}
 
