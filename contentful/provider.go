@@ -30,6 +30,7 @@ func Provider() terraform.ResourceProvider {
 			"contentful_webhook":     resourceContentfulWebhook(),
 			"contentful_locale":      resourceContentfulLocale(),
 			"contentful_environment": resourceContentfulEnvironment(),
+			"contentful_entry":       resourceContentfulEntry(),
 		},
 		ConfigureFunc: providerConfigure,
 	}

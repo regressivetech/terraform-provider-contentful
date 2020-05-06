@@ -18,17 +18,17 @@ func TestAccContentfulContentType_Basic(t *testing.T) {
 			{
 				Config: testAccContentfulContentTypeConfig,
 				Check: resource.TestCheckResourceAttr(
-					"contentful_contenttype.mycontenttype", "name", "TF Acc Test CT 1"),
+					"contentful_contenttype.mycontenttype", "name", "tf_test1"),
 			},
 			{
 				Config: testAccContentfulContentTypeUpdateConfig,
 				Check: resource.TestCheckResourceAttr(
-					"contentful_contenttype.mycontenttype", "name", "TF Acc Test CT name change"),
+					"contentful_contenttype.mycontenttype", "name", "tf_test1"),
 			},
 			{
 				Config: testAccContentfulContentTypeLinkConfig,
 				Check: resource.TestCheckResourceAttr(
-					"contentful_contenttype.mylinked_contenttype", "name", "TF Acc Test Linked CT"),
+					"contentful_contenttype.mylinked_contenttype", "name", "tf_linked"),
 			},
 		},
 	})
@@ -91,7 +91,7 @@ func testAccCheckContentfulContentTypeDestroy(s *terraform.State) (err error) {
 var testAccContentfulContentTypeConfig = `
 resource "contentful_contenttype" "mycontenttype" {
   space_id = "` + spaceID + `"
-  name = "TF Acc Test CT 1"
+  name = "tf_test1"
   description = "Terraform Acc Test Content Type"
   display_field = "field1"
   field {
@@ -118,7 +118,7 @@ resource "contentful_contenttype" "mycontenttype" {
 var testAccContentfulContentTypeUpdateConfig = `
 resource "contentful_contenttype" "mycontenttype" {
   space_id = "` + spaceID + `"
-  name = "TF Acc Test CT name change"
+  name = "tf_test1"
   description = "Terraform Acc Test Content Type description change"
   display_field = "field1"
   field {
@@ -145,7 +145,7 @@ resource "contentful_contenttype" "mycontenttype" {
 var testAccContentfulContentTypeLinkConfig = `
 resource "contentful_contenttype" "mycontenttype" {
   space_id = "` + spaceID + `"
-  name = "TF Acc Test CT name change"
+  name = "tf_test1"
   description = "Terraform Acc Test Content Type description change"
   display_field = "field1"
   field {
@@ -170,7 +170,7 @@ resource "contentful_contenttype" "mycontenttype" {
 
 resource "contentful_contenttype" "mylinked_contenttype" {
   space_id = "` + spaceID + `"
-  name          = "TF Acc Test Linked CT"
+  name          = "tf_linked"
   description   = "Terraform Acc Test Content Type with links"
   display_field = "asset_field"
   field {
