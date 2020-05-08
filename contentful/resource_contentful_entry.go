@@ -149,14 +149,14 @@ func setEntryState(d *schema.ResourceData, m interface{}) (err error) {
 
 	if d.Get("published").(bool) && entry.Sys.PublishedAt == "" {
 		err = client.Entries.Publish(spaceID, entry)
-	} else if d.Get("published").(bool) && entry.Sys.PublishedAt != "" {
+	} else if !d.Get("published").(bool) && entry.Sys.PublishedAt != "" {
 		err = client.Entries.Unpublish(spaceID, entry)
 	}
 
 	if d.Get("archived").(bool) && entry.Sys.ArchivedAt == "" {
-		err = client.Entries.Publish(spaceID, entry)
-	} else if d.Get("archived").(bool) && entry.Sys.ArchivedAt != "" {
-		err = client.Entries.Unpublish(spaceID, entry)
+		err = client.Entries.Archive(spaceID, entry)
+	} else if !d.Get("archived").(bool) && entry.Sys.ArchivedAt != "" {
+		err = client.Entries.Unarchive(spaceID, entry)
 	}
 
 	return nil
