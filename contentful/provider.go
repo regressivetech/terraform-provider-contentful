@@ -31,6 +31,7 @@ func Provider() terraform.ResourceProvider {
 			"contentful_locale":      resourceContentfulLocale(),
 			"contentful_environment": resourceContentfulEnvironment(),
 			"contentful_entry":       resourceContentfulEntry(),
+			"contentful_asset":       resourceContentfulAsset(),
 		},
 		ConfigureFunc: providerConfigure,
 	}
