@@ -152,7 +152,7 @@ resource "contentful_asset" "myasset" {
       contentType = "image/jpeg"
     }
   }
-  published = true
+  published = false
   archived = false
 }
 `
