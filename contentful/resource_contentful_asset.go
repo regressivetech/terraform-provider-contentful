@@ -306,9 +306,7 @@ func setAssetState(d *schema.ResourceData, m interface{}) (err error) {
 		err = client.Assets.Unarchive(spaceID, asset)
 	}
 
-	if err := setAssetProperties(d, asset); err != nil {
-		return err
-	}
+	err = setAssetProperties(d, asset)
 
 	return err
 }
