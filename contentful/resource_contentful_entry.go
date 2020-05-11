@@ -89,17 +89,17 @@ func resourceCreateEntry(d *schema.ResourceData, m interface{}) (err error) {
 		return err
 	}
 
-	err = setEntryState(d, m)
-	if err != nil {
-		return err
-	}
-
 	if err := setEntryProperties(d, entry); err != nil {
 		return err
 	}
 
 	d.SetId(entry.Sys.ID)
-	return nil
+
+	if err := setEntryState(d, m); err != nil {
+		return err
+	}
+
+	return err
 }
 
 func resourceUpdateEntry(d *schema.ResourceData, m interface{}) (err error) {
@@ -128,16 +128,17 @@ func resourceUpdateEntry(d *schema.ResourceData, m interface{}) (err error) {
 		return err
 	}
 
-	if err := setEntryState(d, m); err != nil {
-		return err
-	}
+	d.SetId(entry.Sys.ID)
 
 	if err := setEntryProperties(d, entry); err != nil {
 		return err
 	}
-	d.SetId(entry.Sys.ID)
 
-	return nil
+	if err := setEntryState(d, m); err != nil {
+		return err
+	}
+
+	return err
 }
 
 func setEntryState(d *schema.ResourceData, m interface{}) (err error) {
@@ -149,17 +150,17 @@ func setEntryState(d *schema.ResourceData, m interface{}) (err error) {
 
 	if d.Get("published").(bool) && entry.Sys.PublishedAt == "" {
 		err = client.Entries.Publish(spaceID, entry)
-	} else if d.Get("published").(bool) && entry.Sys.PublishedAt != "" {
+	} else if !d.Get("published").(bool) && entry.Sys.PublishedAt != "" {
 		err = client.Entries.Unpublish(spaceID, entry)
 	}
 
 	if d.Get("archived").(bool) && entry.Sys.ArchivedAt == "" {
-		err = client.Entries.Publish(spaceID, entry)
-	} else if d.Get("archived").(bool) && entry.Sys.ArchivedAt != "" {
-		err = client.Entries.Unpublish(spaceID, entry)
+		err = client.Entries.Archive(spaceID, entry)
+	} else if !d.Get("archived").(bool) && entry.Sys.ArchivedAt != "" {
+		err = client.Entries.Unarchive(spaceID, entry)
 	}
 
-	return nil
+	return err
 }
 
 func resourceReadEntry(d *schema.ResourceData, m interface{}) (err error) {
@@ -189,18 +190,18 @@ func resourceDeleteEntry(d *schema.ResourceData, m interface{}) (err error) {
 	return client.Entries.Delete(spaceID, entryID)
 }
 
-func setEntryProperties(d *schema.ResourceData, entry *contentful.Entry) error {
-	if err := d.Set("space_id", entry.Sys.Space.Sys.ID); err != nil {
+func setEntryProperties(d *schema.ResourceData, entry *contentful.Entry) (err error) {
+	if err = d.Set("space_id", entry.Sys.Space.Sys.ID); err != nil {
 		return err
 	}
 
-	if err := d.Set("version", entry.Sys.Version); err != nil {
+	if err = d.Set("version", entry.Sys.Version); err != nil {
 		return err
 	}
 
-	if err := d.Set("contenttype_id", entry.Sys.ContentType.Sys.ID); err != nil {
+	if err = d.Set("contenttype_id", entry.Sys.ContentType.Sys.ID); err != nil {
 		return err
 	}
 
-	return nil
+	return err
 }

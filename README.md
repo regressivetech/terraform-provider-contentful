@@ -19,7 +19,8 @@ Create, update and delete Contentful resources such as:
 - [x] Webhooks
 - [x] Locales
 - [x] Environments
-- [ ] Organizations
+- [x] Entries
+- [x] Assets
 
 # Getting started
 
