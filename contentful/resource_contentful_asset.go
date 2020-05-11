@@ -167,7 +167,6 @@ func resourceCreateAsset(d *schema.ResourceData, m interface{}) (err error) {
 				d.Get("locale").(string): {
 					FileName:    file["fileName"].(string),
 					ContentType: file["contentType"].(string),
-					UploadURL:   file["upload"].(string),
 				},
 			},
 		},
@@ -175,6 +174,10 @@ func resourceCreateAsset(d *schema.ResourceData, m interface{}) (err error) {
 
 	if url, ok := file["url"].(string); ok {
 		asset.Fields.File[d.Get("locale").(string)].URL = url
+	}
+
+	if upload, ok := file["upload"].(string); ok {
+		asset.Fields.File[d.Get("locale").(string)].UploadURL = upload
 	}
 
 	if details, ok := file["fileDetails"].(*contentful.FileDetails); ok {
@@ -191,17 +194,18 @@ func resourceCreateAsset(d *schema.ResourceData, m interface{}) (err error) {
 		return err
 	}
 
-	err = setAssetState(d, m)
-	if err != nil {
-		return err
-	}
+	d.SetId(asset.Sys.ID)
 
 	if err := setAssetProperties(d, asset); err != nil {
 		return err
 	}
 
-	d.SetId(asset.Sys.ID)
-	return nil
+	err = setAssetState(d, m)
+	if err != nil {
+		return err
+	}
+
+	return err
 }
 
 func resourceUpdateAsset(d *schema.ResourceData, m interface{}) (err error) {
@@ -269,17 +273,18 @@ func resourceUpdateAsset(d *schema.ResourceData, m interface{}) (err error) {
 		return err
 	}
 
-	err = setAssetState(d, m)
-	if err != nil {
-		return err
-	}
+	d.SetId(asset.Sys.ID)
 
 	if err := setAssetProperties(d, asset); err != nil {
 		return err
 	}
 
-	d.SetId(asset.Sys.ID)
-	return nil
+	err = setAssetState(d, m)
+	if err != nil {
+		return err
+	}
+
+	return err
 }
 
 func setAssetState(d *schema.ResourceData, m interface{}) (err error) {
@@ -301,7 +306,11 @@ func setAssetState(d *schema.ResourceData, m interface{}) (err error) {
 		err = client.Assets.Unarchive(spaceID, asset)
 	}
 
-	return nil
+	if err := setAssetProperties(d, asset); err != nil {
+		return err
+	}
+
+	return err
 }
 
 func resourceReadAsset(d *schema.ResourceData, m interface{}) (err error) {
@@ -331,14 +340,14 @@ func resourceDeleteAsset(d *schema.ResourceData, m interface{}) (err error) {
 	return client.Assets.Delete(spaceID, asset)
 }
 
-func setAssetProperties(d *schema.ResourceData, asset *contentful.Asset) error {
-	if err := d.Set("space_id", asset.Sys.Space.Sys.ID); err != nil {
+func setAssetProperties(d *schema.ResourceData, asset *contentful.Asset) (err error) {
+	if err = d.Set("space_id", asset.Sys.Space.Sys.ID); err != nil {
 		return err
 	}
 
-	if err := d.Set("version", asset.Sys.Version); err != nil {
+	if err = d.Set("version", asset.Sys.Version); err != nil {
 		return err
 	}
 
-	return nil
+	return err
 }
