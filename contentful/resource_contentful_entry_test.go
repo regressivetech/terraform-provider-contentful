@@ -200,7 +200,7 @@ resource "contentful_entry" "myentry" {
     content = "Bacon is healthy!"
     locale = "en-US"
   }
-  published = true
+  published = false
   archived  = false
   depends_on = [contentful_contenttype.mycontenttype]
 }
