@@ -107,13 +107,9 @@ func resourceContentfulAsset() *schema.Resource {
 											},
 										},
 									},
-									"uploadFrom": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
 									"fileName": {
 										Type:     schema.TypeString,
-										Computed: true,
+										Required: true,
 									},
 									"contentType": {
 										Type:     schema.TypeString,
@@ -188,10 +184,6 @@ func resourceCreateAsset(d *schema.ResourceData, m interface{}) (err error) {
 		asset.Fields.File[d.Get("locale").(string)].Details = details
 	}
 
-	if uploadFrom, ok := file["uploadFrom"].(string); ok {
-		asset.Fields.File[d.Get("locale").(string)].UploadFrom.Sys.ID = uploadFrom
-	}
-
 	err = client.Assets.Upsert(d.Get("space_id").(string), asset)
 	if err != nil {
 		return err
@@ -257,6 +249,7 @@ func resourceUpdateAsset(d *schema.ResourceData, m interface{}) (err error) {
 				d.Get("locale").(string): {
 					FileName:    file["fileName"].(string),
 					ContentType: file["contentType"].(string),
+					UploadURL:   file["upload"].(string),
 				},
 			},
 		},
@@ -266,16 +259,8 @@ func resourceUpdateAsset(d *schema.ResourceData, m interface{}) (err error) {
 		asset.Fields.File[d.Get("locale").(string)].URL = url
 	}
 
-	if upload, ok := file["upload"].(string); ok {
-		asset.Fields.File[d.Get("locale").(string)].UploadURL = upload
-	}
-
 	if details, ok := file["fileDetails"].(*contentful.FileDetails); ok {
 		asset.Fields.File[d.Get("locale").(string)].Details = details
-	}
-
-	if uploadFrom, ok := file["uploadFrom"].(string); ok {
-		asset.Fields.File[d.Get("locale").(string)].UploadFrom.Sys.ID = uploadFrom
 	}
 
 	err = client.Assets.Upsert(d.Get("space_id").(string), asset)
