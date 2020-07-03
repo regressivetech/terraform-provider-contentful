@@ -1,0 +1,63 @@
+To make uploads resource work, the do function in the contentful go sdk
+needs to be edited. This method will return an error containing the
+response body. This is not included in the official repo, because this
+is a temporary (and an ugly) fix.
+
+func (c *Client) do(req *http.Request, v interface{}) error {
+	if c.Debug == true {
+		command, _ := http2curl.GetCurlCommand(req)
+		fmt.Println(command)
+	}
+
+	res, err := c.client.Do(req)
+	if err != nil {
+		return err
+	}
+
+	if res.StatusCode >= 200 && res.StatusCode < 400 {
+		// Upload/Create Resource response cannot be decoded
+		if c.api == "URC" && req.Method == "POST" {
+			// Nulpointer workaround, set response as error and catch in service
+			buf := new(bytes.Buffer)
+			buf.ReadFrom(res.Body)
+			err = errors.New(buf.String())
+			defer res.Body.Close()
+			return err
+		} else {
+			if v != nil {
+				defer res.Body.Close()
+				err = json.NewDecoder(res.Body).Decode(v)
+				if err != nil {
+					return err
+				}
+			}
+		}
+
+		return nil
+	}
+
+	// parse api response
+	apiError := c.handleError(req, res)
+
+	// return apiError if it is not rate limit error
+	if _, ok := apiError.(RateLimitExceededError); !ok {
+		return apiError
+	}
+
+	resetHeader := res.Header.Get("x-contentful-ratelimit-reset")
+
+	// return apiError if Ratelimit-Reset header is not presented
+	if resetHeader == "" {
+		return apiError
+	}
+
+	// wait X-Contentful-Ratelimit-Reset amount of seconds
+	waitSeconds, err := strconv.Atoi(resetHeader)
+	if err != nil {
+		return apiError
+	}
+
+	time.Sleep(time.Second * time.Duration(waitSeconds))
+
+	return c.do(req, v)
+}
