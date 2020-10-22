@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/hashicorp/terraform/plugin"
 	"github.com/hashicorp/terraform/terraform"
-	"github.com/labd/terraform-contentful/contentful"
+	"github.com/labd/terraform-provider-contentful/contentful"
 )
 
 func main() {
