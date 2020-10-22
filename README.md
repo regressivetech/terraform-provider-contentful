@@ -150,7 +150,7 @@ Julien Fabre: [Writing a Terraform provider](http://blog.jfabre.net/2017/01/22/w
 
 ## Support
 
-If you have a problem with this provider, please file an [issue](https://github.com/contentful-labs/terraform-contentful/issues/new) here on Github.
+If you have a problem with this provider, please file an [issue](https://github.com/labd/terraform-provider-contentful/issues/new) here on Github.
 
 ## License
 
