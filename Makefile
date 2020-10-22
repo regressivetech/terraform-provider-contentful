@@ -1,6 +1,6 @@
 .PHONY: build
 build:
-	sudo -S docker build -t terraform-provider-contentful -f Dockerfile-test .
+	go build
 
 .PHONY: test-unit
 test-unit: build
@@ -15,7 +15,7 @@ test-unit: build
 .PHONY: interactive
 interactive:
 	sudo -S docker run -it \
-		-v $(shell pwd):/go/src/github.com/labd/terraform-contentful \
+		-v $(shell pwd):/go/src/github.com/labd/terraform-provider-contentful \
 		-e CONTENTFUL_MANAGEMENT_TOKEN=${CONTENTFUL_MANAGEMENT_TOKEN} \
         -e CONTENTFUL_ORGANIZATION_ID=${CONTENTFUL_ORGANIZATION_ID} \
         -e SPACE_ID=${SPACE_ID} \
