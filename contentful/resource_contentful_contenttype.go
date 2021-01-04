@@ -70,10 +70,10 @@ func resourceContentfulContentType() *schema.Resource {
 										Type:     schema.TypeString,
 										Required: true,
 									},
-									"validation": {
+									"validations": {
 										Type:     schema.TypeList,
 										Optional: true,
-										Elem:     generateValidationSchema(),
+										Elem:     &schema.Schema{Type: schema.TypeString},
 									},
 								},
 							},
@@ -98,10 +98,10 @@ func resourceContentfulContentType() *schema.Resource {
 							Optional: true,
 							Default:  false,
 						},
-						"validation": {
+						"validations": {
 							Type:     schema.TypeList,
 							Optional: true,
-							Elem:     generateValidationSchema(),
+							Elem:     &schema.Schema{Type: schema.TypeString},
 						},
 					},
 				},
@@ -594,6 +594,7 @@ func expandContentTypeFieldValidationRegex(in []interface{}) contentful.FieldVal
 	return validation
 }
 
+// noinspection GoUnusedFunction
 func generateValidationSchema() *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{

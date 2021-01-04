@@ -188,12 +188,7 @@ resource "contentful_contenttype" "mylinked_contenttype" {
     name      = "Entry Link Field"
     type      = "Link"
     link_type = "Entry"
-    dynamic "validation" {
-      for_each = ["{\"linkContentType\": [\"${contentful_contenttype.mycontenttype.id}\"]}"]
-      content {
-        link      = lookup(contentful_contenttype.mycontenttype, "link", null)
-      }
-    }
+    validations = ["{\"linkContentType\": [\"${contentful_contenttype.mycontenttype.id}\"]}"]
     required = false
   }
 }
