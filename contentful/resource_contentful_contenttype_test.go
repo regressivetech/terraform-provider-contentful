@@ -188,7 +188,13 @@ resource "contentful_contenttype" "mylinked_contenttype" {
     name      = "Entry Link Field"
     type      = "Link"
     link_type = "Entry"
-    validations = ["{\"linkContentType\": [\"${contentful_contenttype.mycontenttype.id}\"]}"]
+    validations = [
+	  jsonencode({
+		linkContentType = [
+          contentful_contenttype.mycontenttype.id
+		]
+	  })
+	]
     required = false
   }
 }
