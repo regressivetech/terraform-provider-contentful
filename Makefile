@@ -1,8 +1,8 @@
-.PHONY: build
+.PHONY: build, test-unit, interactive, testacc
+
 build:
 	go build
 
-.PHONY: test-unit
 test-unit: build
 	sudo docker run \
 		-e CONTENTFUL_MANAGEMENT_TOKEN=${CONTENTFUL_MANAGEMENT_TOKEN} \
@@ -12,7 +12,6 @@ test-unit: build
 		terraform-provider-contentful \
 		go test ./... -v
 
-.PHONY: interactive
 interactive:
 	sudo -S docker run -it \
 		-v $(shell pwd):/go/src/github.com/labd/terraform-provider-contentful \
@@ -21,3 +20,6 @@ interactive:
         -e SPACE_ID=${SPACE_ID} \
 		terraform-provider-contentful \
 		bash
+
+testacc:
+	TF_ACC=1 go test -v ./...
