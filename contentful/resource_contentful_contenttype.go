@@ -38,6 +38,10 @@ func resourceContentfulContentType() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"env_id": {
+				Type:     schema.TypeString,
+				Required: true,
+			},
 			"field": {
 				Type:     schema.TypeList,
 				Required: true,
@@ -116,6 +120,7 @@ func resourceContentfulContentType() *schema.Resource {
 func resourceContentTypeCreate(d *schema.ResourceData, m interface{}) (err error) {
 	client := m.(*contentful.Client)
 	spaceID := d.Get("space_id").(string)
+	envID := d.Get("env_id").(string)
 
 	ct := &contentful.ContentType{
 		Name:         d.Get("name").(string),
@@ -129,6 +134,12 @@ func resourceContentTypeCreate(d *schema.ResourceData, m interface{}) (err error
 		ct.Sys = &contentful.Sys{
 			ID: id.(string),
 		}
+	}
+
+	env, err := client.Environments.Get(spaceID, envID)
+
+	if err != nil {
+		return err
 	}
 
 	if description, ok := d.GetOk("description"); ok {
@@ -169,11 +180,15 @@ func resourceContentTypeCreate(d *schema.ResourceData, m interface{}) (err error
 		ct.Fields = append(ct.Fields, contentfulField)
 	}
 
-	if err = client.ContentTypes.Upsert(spaceID, ct); err != nil {
+	if err = client.ContentTypes.UpsertEnv(env, ct); err != nil {
 		return err
 	}
 
-	if err = client.ContentTypes.Activate(spaceID, ct); err != nil {
+	if err != nil {
+		return err
+	}
+
+	if err = client.ContentTypes.Activate(env.Sys.Space.Sys.ID, ct); err != nil {
 		return err
 	}
 
@@ -189,9 +204,13 @@ func resourceContentTypeCreate(d *schema.ResourceData, m interface{}) (err error
 func resourceContentTypeRead(d *schema.ResourceData, m interface{}) (err error) {
 	client := m.(*contentful.Client)
 	spaceID := d.Get("space_id").(string)
+	envID := d.Get("env_id").(string)
+	env, err := client.Environments.Get(spaceID, envID)
 
-	_, err = client.ContentTypes.Get(spaceID, d.Id())
-
+	if err != nil {
+		return err
+	}
+	_, err = client.ContentTypes.GetFromEnv(env, d.Id())
 	return err
 }
 
@@ -201,8 +220,14 @@ func resourceContentTypeUpdate(d *schema.ResourceData, m interface{}) (err error
 
 	client := m.(*contentful.Client)
 	spaceID := d.Get("space_id").(string)
+	envID := d.Get("env_id").(string)
 
-	ct, err := client.ContentTypes.Get(spaceID, d.Id())
+	env, err := client.Environments.Get(spaceID, envID)
+	if err != nil {
+		return err
+	}
+
+	ct, err := client.ContentTypes.GetFromEnv(env, d.Id())
 	if err != nil {
 		return err
 	}
@@ -229,22 +254,23 @@ func resourceContentTypeUpdate(d *schema.ResourceData, m interface{}) (err error
 	// To remove a field from a content type 4 API calls need to be made.
 	// Omit the removed fields and publish the new version of the content type,
 	// followed by the field removal and final publish.
-	if err = client.ContentTypes.Upsert(spaceID, ct); err != nil {
+	if err = client.ContentTypes.UpsertEnv(env, ct); err != nil {
 		return err
 	}
 
-	if err = client.ContentTypes.Activate(spaceID, ct); err != nil {
+	if err = client.ContentTypes.Activate(env.Sys.Space.Sys.ID, ct); err != nil {
 		return err
 	}
 
 	if deletedFields != nil {
 		ct.Fields = existingFields
 
-		if err = client.ContentTypes.Upsert(spaceID, ct); err != nil {
+		if err = client.ContentTypes.UpsertEnv(env, ct); err != nil {
 			return err
 		}
 
-		if err = client.ContentTypes.Activate(spaceID, ct); err != nil {
+		// TODO: Update to use environment
+		if err = client.ContentTypes.Activate(env.Sys.Space.Sys.ID, ct); err != nil {
 			return err
 		}
 	}
@@ -255,18 +281,21 @@ func resourceContentTypeUpdate(d *schema.ResourceData, m interface{}) (err error
 func resourceContentTypeDelete(d *schema.ResourceData, m interface{}) (err error) {
 	client := m.(*contentful.Client)
 	spaceID := d.Get("space_id").(string)
+	envID := d.Get("env_id").(string)
 
-	ct, err := client.ContentTypes.Get(spaceID, d.Id())
+	env, err := client.Environments.Get(spaceID, envID)
+
+	ct, err := client.ContentTypes.GetFromEnv(env, d.Id())
 	if err != nil {
 		return err
 	}
 
-	err = client.ContentTypes.Deactivate(spaceID, ct)
-	if err != nil {
+	// TODO: Update to use environment
+	if err = client.ContentTypes.Deactivate(env.Sys.Space.Sys.ID, ct); err != nil {
 		return err
 	}
 
-	if err = client.ContentTypes.Delete(spaceID, ct); err != nil {
+	if err = client.ContentTypes.DeleteFromEnv(env, ct); err != nil {
 		return err
 	}
 
