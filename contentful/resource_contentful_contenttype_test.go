@@ -35,6 +35,11 @@ func TestAccContentfulContentType_Basic(t *testing.T) {
 				Check: resource.TestCheckResourceAttr(
 					"contentful_configtype.content_type_with_id", "id", "contentTypeWithID"),
 			},
+			{
+				Config: testAccContentfulContentTypeUpdateConfig,
+				Check: resource.TestCheckResourceAttr(
+					"contentful_contenttype.content_type_with_env", "environment", "my_env"),
+			},
 		},
 	})
 }
@@ -56,9 +61,25 @@ func testAccCheckContentfulContentTypeExists(n string, contentType *contentful.C
 			return fmt.Errorf("no space_id is set")
 		}
 
+		envID := rs.Primary.Attributes["env_id"]
+		if envID == "" {
+			return fmt.Errorf("no env_id is set")
+		}
+
 		client := testAccProvider.Meta().(*contentful.Client)
 
-		ct, err := client.ContentTypes.Get(spaceID, rs.Primary.ID)
+		env := &contentful.Environment{
+			Sys: &contentful.Sys{
+				ID: envID,
+				Space: &contentful.Space{
+					Sys: &contentful.Sys{
+						ID: spaceID,
+					},
+				},
+			},
+		}
+
+		ct, err := client.ContentTypes.Get(env, rs.Primary.ID)
 		if err != nil {
 			return err
 		}
@@ -80,9 +101,25 @@ func testAccCheckContentfulContentTypeDestroy(s *terraform.State) (err error) {
 			return fmt.Errorf("no space_id is set")
 		}
 
+		envID := rs.Primary.Attributes["env_id"]
+		if envID == "" {
+			return fmt.Errorf("no env_id is set")
+		}
+
 		client := testAccProvider.Meta().(*contentful.Client)
 
-		_, err := client.ContentTypes.Get(spaceID, rs.Primary.ID)
+		env := &contentful.Environment{
+			Sys: &contentful.Sys{
+				ID: envID,
+				Space: &contentful.Space{
+					Sys: &contentful.Sys{
+						ID: spaceID,
+					},
+				},
+			},
+		}
+
+		_, err := client.ContentTypes.Get(env, rs.Primary.ID)
 		if _, ok := err.(contentful.NotFoundError); ok {
 			return nil
 		}
@@ -96,6 +133,7 @@ func testAccCheckContentfulContentTypeDestroy(s *terraform.State) (err error) {
 var testAccContentfulContentTypeConfig = `
 resource "contentful_contenttype" "mycontenttype" {
   space_id = "` + spaceID + `"
+	env_id = "` + envID + `"
   name = "tf_test1"
   description = "Terraform Acc Test Content Type"
   display_field = "field1"
@@ -123,6 +161,7 @@ resource "contentful_contenttype" "mycontenttype" {
 var testAccContentfulContentTypeUpdateConfig = `
 resource "contentful_contenttype" "mycontenttype" {
   space_id = "` + spaceID + `"
+	env_id = "` + envID + `"
   name = "tf_test1"
   description = "Terraform Acc Test Content Type description change"
   display_field = "field1"
@@ -147,9 +186,12 @@ resource "contentful_contenttype" "mycontenttype" {
 }
 `
 
+var envID = "env_id"
+
 var testAccContentfulContentTypeLinkConfig = `
 resource "contentful_contenttype" "mycontenttype" {
   space_id = "` + spaceID + `"
+	env_id = "` + envID + `"
   name = "tf_test1"
   description = "Terraform Acc Test Content Type description change"
   display_field = "field1"
@@ -175,6 +217,7 @@ resource "contentful_contenttype" "mycontenttype" {
 
 resource "contentful_contenttype" "mylinked_contenttype" {
   space_id = "` + spaceID + `"
+	env_id = "` + envID + `"
   name          = "tf_linked"
   description   = "Terraform Acc Test Content Type with links"
   display_field = "asset_field"
@@ -206,10 +249,38 @@ resource "contentful_contenttype" "mylinked_contenttype" {
 
 resource "contentful_contenttype" "content_type_with_id" {
   space_id = "` + spaceID + `"
+	env_id = "` + envID + `"
   name = "tf_test_with_id"
   description = "Content Type with ID"
   display_field = "fieldWithID"
 	content_type_id = "contentTypeWithID"
+  field {
+	disabled  = false
+	id        = "field1"
+	localized = false
+	name      = "Field 1 name"
+	omitted   = false
+	required  = true
+	type      = "Text"
+  }
+  field {
+	disabled  = false
+	id        = "field2"
+	localized = false
+	name      = "Field 2 name"
+	omitted   = false
+	required  = true
+	type      = "Integer"
+  }	
+}
+
+resource "contentful_contenttype" "content_type_with_env" {
+  space_id = "` + spaceID + `"
+	env_id = "` + envID + `"
+  name = "tf_test_with_id"
+  description = "Content Type with ID"
+  display_field = "fieldWithID"
+	environment = "my_env"
   field {
 	disabled  = false
 	id        = "field1"
