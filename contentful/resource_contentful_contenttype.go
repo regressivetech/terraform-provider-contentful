@@ -34,6 +34,10 @@ func resourceContentfulContentType() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
+			"content_type_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"field": {
 				Type:     schema.TypeList,
 				Required: true,
@@ -117,6 +121,14 @@ func resourceContentTypeCreate(d *schema.ResourceData, m interface{}) (err error
 		Name:         d.Get("name").(string),
 		DisplayField: d.Get("display_field").(string),
 		Fields:       []*contentful.Field{},
+	}
+
+	id := d.Get("content_type_id")
+
+	if id != nil {
+		ct.Sys = &contentful.Sys{
+			ID: id.(string),
+		}
 	}
 
 	if description, ok := d.GetOk("description"); ok {
