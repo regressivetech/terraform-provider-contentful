@@ -6,7 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
-	contentful "github.com/labd/contentful-go"
+	contentful "github.com/regressivetech/contentful-go"
 )
 
 func TestAccContentfulAsset_Basic(t *testing.T) {
