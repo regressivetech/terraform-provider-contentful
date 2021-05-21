@@ -30,6 +30,11 @@ func TestAccContentfulContentType_Basic(t *testing.T) {
 				Check: resource.TestCheckResourceAttr(
 					"contentful_contenttype.mylinked_contenttype", "name", "tf_linked"),
 			},
+			{
+				Config: testAccContentfulContentTypeUpdateConfig,
+				Check: resource.TestCheckResourceAttr(
+					"contentful_configtype.content_type_with_id", "id", "contentTypeWithID"),
+			},
 		},
 	})
 }
@@ -197,5 +202,31 @@ resource "contentful_contenttype" "mylinked_contenttype" {
 	]
     required = false
   }
+}
+
+resource "contentful_contenttype" "content_type_with_id" {
+  space_id = "` + spaceID + `"
+  name = "tf_test_with_id"
+  description = "Content Type with ID"
+  display_field = "fieldWithID"
+	content_type_id = "contentTypeWithID"
+  field {
+	disabled  = false
+	id        = "field1"
+	localized = false
+	name      = "Field 1 name"
+	omitted   = false
+	required  = true
+	type      = "Text"
+  }
+  field {
+	disabled  = false
+	id        = "field2"
+	localized = false
+	name      = "Field 2 name"
+	omitted   = false
+	required  = true
+	type      = "Integer"
+  }	
 }
 `
