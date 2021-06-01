@@ -14,9 +14,10 @@ func resourceContentfulContentType() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"space_id": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:        schema.TypeString,
+				Required:    true,
+				ForceNew:    true,
+				Description: "The space to apply this content type to",
 			},
 			"version": {
 				Type:     schema.TypeInt,
@@ -35,8 +36,9 @@ func resourceContentfulContentType() *schema.Resource {
 				Required: true,
 			},
 			"content_type_id": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The identifier to use for this content type",
 			},
 			"field": {
 				Type:     schema.TypeList,

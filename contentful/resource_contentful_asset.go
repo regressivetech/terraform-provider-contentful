@@ -26,8 +26,9 @@ func resourceContentfulAsset() *schema.Resource {
 				Required: true,
 			},
 			"space_id": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "The space to apply this content type to",
 			},
 			"fields": {
 				Type:     schema.TypeList,
