@@ -6,7 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
-	contentful "github.com/labd/contentful-go"
+	contentful "github.com/regressivetech/contentful-go"
 )
 
 func TestAccContentfulEntry_Basic(t *testing.T) {
@@ -40,6 +40,16 @@ func TestAccContentfulEntry_Basic(t *testing.T) {
 }
 
 func testAccCheckContentfulEntryExists(n string, entry *contentful.Entry) resource.TestCheckFunc {
+	env := &contentful.Environment{
+		Sys: &contentful.Sys{
+			ID: envID,
+			Space: &contentful.Space{
+				Sys: &contentful.Sys{
+					ID: spaceID,
+				},
+			},
+		},
+	}
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -58,7 +68,7 @@ func testAccCheckContentfulEntryExists(n string, entry *contentful.Entry) resour
 
 		client := testAccProvider.Meta().(*contentful.Client)
 
-		contentfulEntry, err := client.Entries.Get(spaceID, rs.Primary.ID)
+		contentfulEntry, err := client.Entries.Get(env, rs.Primary.ID)
 		if err != nil {
 			return err
 		}
@@ -82,6 +92,17 @@ func testAccCheckContentfulEntryAttributes(entry *contentful.Entry, attrs map[st
 }
 
 func testAccContentfulEntryDestroy(s *terraform.State) error {
+	env := &contentful.Environment{
+		Sys: &contentful.Sys{
+			ID: envID,
+			Space: &contentful.Space{
+				Sys: &contentful.Sys{
+					ID: spaceID,
+				},
+			},
+		},
+	}
+
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "contentful_entry" {
 			continue
@@ -101,7 +122,7 @@ func testAccContentfulEntryDestroy(s *terraform.State) error {
 		// sdk client
 		client := testAccProvider.Meta().(*contentful.Client)
 
-		entry, _ := client.Entries.Get(spaceID, rs.Primary.ID)
+		entry, _ := client.Entries.Get(env, rs.Primary.ID)
 		if entry == nil {
 			return nil
 		}
@@ -115,33 +136,35 @@ func testAccContentfulEntryDestroy(s *terraform.State) error {
 var testAccContentfulEntryConfig = `
 resource "contentful_contenttype" "mycontenttype" {
   space_id = "` + spaceID + `"
+	env_id = "` + envID + `"
   name = "tf_test_1"
   description = "Terraform Acc Test Content Type"
   display_field = "field1"
   field {
-	disabled  = false
-	id        = "field1"
-	localized = false
-	name      = "Field 1"
-	omitted   = false
-	required  = true
-	type      = "Text"
+		disabled  = false
+		id        = "field1"
+		localized = false
+		name      = "Field 1"
+		omitted   = false
+		required  = true
+		type      = "Text"
   }
   field {
-	disabled  = false
-	id        = "field2"
-	localized = false
-	name      = "Field 2"
-	omitted   = false
-	required  = true
-	type      = "Text"
+		disabled  = false
+		id        = "field2"
+		localized = false
+		name      = "Field 2"
+		omitted   = false
+		required  = true
+		type      = "Text"
   }
 }
 
 resource "contentful_entry" "myentry" {
   entry_id = "mytestentry"
   space_id = "` + spaceID + `"
-  contenttype_id = "tf_test_1"
+	env_id = "` + envID + `"
+  contenttype_id = "${contentful_contenttype.mycontenttype.id}"
   locale = "en-US"
   field {
     id = "field1"
@@ -162,6 +185,7 @@ resource "contentful_entry" "myentry" {
 var testAccContentfulEntryUpdateConfig = `
 resource "contentful_contenttype" "mycontenttype" {
   space_id = "` + spaceID + `"
+	env_id = "` + envID + `"
   name = "tf_test_1"
   description = "Terraform Acc Test Content Type"
   display_field = "field1"
@@ -188,7 +212,8 @@ resource "contentful_contenttype" "mycontenttype" {
 resource "contentful_entry" "myentry" {
   entry_id = "mytestentry"
   space_id = "` + spaceID + `"
-  contenttype_id = "tf_test_1"
+	env_id = "` + envID + `"
+  contenttype_id = "${contentful_contenttype.mycontenttype.id}"
   locale = "en-US"
   field {
     id = "field1"

@@ -2,7 +2,7 @@ package contentful
 
 import (
 	"github.com/hashicorp/terraform/helper/schema"
-	contentful "github.com/labd/contentful-go"
+	contentful "github.com/regressivetech/contentful-go"
 )
 
 func resourceContentfulEntry() *schema.Resource {
@@ -22,6 +22,10 @@ func resourceContentfulEntry() *schema.Resource {
 				Computed: true,
 			},
 			"space_id": {
+				Type:     schema.TypeString,
+				Required: true,
+			},
+			"env_id": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
@@ -67,6 +71,13 @@ func resourceContentfulEntry() *schema.Resource {
 
 func resourceCreateEntry(d *schema.ResourceData, m interface{}) (err error) {
 	client := m.(*contentful.Client)
+	spaceID := d.Get("space_id").(string)
+	envID := d.Get("env_id").(string)
+
+	env, err := client.Environments.Get(spaceID, envID)
+	if err != nil {
+		return err
+	}
 
 	fieldProperties := map[string]interface{}{}
 	rawField := d.Get("field").([]interface{})
@@ -84,7 +95,7 @@ func resourceCreateEntry(d *schema.ResourceData, m interface{}) (err error) {
 		},
 	}
 
-	err = client.Entries.Upsert(d.Get("space_id").(string), d.Get("contenttype_id").(string), entry)
+	err = client.Entries.Upsert(env, d.Get("contenttype_id").(string), entry)
 	if err != nil {
 		return err
 	}
@@ -106,8 +117,16 @@ func resourceUpdateEntry(d *schema.ResourceData, m interface{}) (err error) {
 	client := m.(*contentful.Client)
 	spaceID := d.Get("space_id").(string)
 	entryID := d.Id()
+	envID := d.Get("env_id").(string)
 
-	entry, err := client.Entries.Get(spaceID, entryID)
+	// lookup the environment
+	env, err := client.Environments.Get(spaceID, envID)
+	if err != nil {
+		return err
+	}
+
+	// lookup the entry
+	entry, err := client.Entries.Get(env, entryID)
 	if err != nil {
 		return err
 	}
@@ -123,7 +142,7 @@ func resourceUpdateEntry(d *schema.ResourceData, m interface{}) (err error) {
 	entry.Fields = fieldProperties
 	entry.Locale = d.Get("locale").(string)
 
-	err = client.Entries.Upsert(d.Get("space_id").(string), d.Get("contenttype_id").(string), entry)
+	err = client.Entries.Upsert(env, d.Get("contenttype_id").(string), entry)
 	if err != nil {
 		return err
 	}
@@ -145,19 +164,26 @@ func setEntryState(d *schema.ResourceData, m interface{}) (err error) {
 	client := m.(*contentful.Client)
 	spaceID := d.Get("space_id").(string)
 	entryID := d.Id()
+	envID := d.Get("env_id").(string)
 
-	entry, _ := client.Entries.Get(spaceID, entryID)
+	env, err := client.Environments.Get(spaceID, envID)
+
+	if err != nil {
+		return err
+	}
+
+	entry, _ := client.Entries.Get(env, entryID)
 
 	if d.Get("published").(bool) && entry.Sys.PublishedAt == "" {
-		err = client.Entries.Publish(spaceID, entry)
+		err = client.Entries.Publish(env, entry)
 	} else if !d.Get("published").(bool) && entry.Sys.PublishedAt != "" {
-		err = client.Entries.Unpublish(spaceID, entry)
+		err = client.Entries.Unpublish(env, entry)
 	}
 
 	if d.Get("archived").(bool) && entry.Sys.ArchivedAt == "" {
-		err = client.Entries.Archive(spaceID, entry)
+		err = client.Entries.Archive(env, entry)
 	} else if !d.Get("archived").(bool) && entry.Sys.ArchivedAt != "" {
-		err = client.Entries.Unarchive(spaceID, entry)
+		err = client.Entries.Unarchive(env, entry)
 	}
 
 	return err
@@ -167,8 +193,14 @@ func resourceReadEntry(d *schema.ResourceData, m interface{}) (err error) {
 	client := m.(*contentful.Client)
 	spaceID := d.Get("space_id").(string)
 	entryID := d.Id()
+	envID := d.Get("env_id").(string)
 
-	entry, err := client.Entries.Get(spaceID, entryID)
+	env, err := client.Environments.Get(spaceID, envID)
+	if err != nil {
+		return err
+	}
+
+	entry, err := client.Entries.Get(env, entryID)
 	if _, ok := err.(contentful.NotFoundError); ok {
 		d.SetId("")
 		return nil
@@ -181,13 +213,19 @@ func resourceDeleteEntry(d *schema.ResourceData, m interface{}) (err error) {
 	client := m.(*contentful.Client)
 	spaceID := d.Get("space_id").(string)
 	entryID := d.Id()
+	envID := d.Get("env_id").(string)
 
-	_, err = client.Entries.Get(spaceID, entryID)
+	env, err := client.Environments.Get(spaceID, envID)
 	if err != nil {
 		return err
 	}
 
-	return client.Entries.Delete(spaceID, entryID)
+	_, err = client.Entries.Get(env, entryID)
+	if err != nil {
+		return err
+	}
+
+	return client.Entries.Delete(env, entryID)
 }
 
 func setEntryProperties(d *schema.ResourceData, entry *contentful.Entry) (err error) {

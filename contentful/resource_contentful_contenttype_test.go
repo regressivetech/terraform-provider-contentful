@@ -6,8 +6,10 @@ import (
 
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
-	contentful "github.com/labd/contentful-go"
+	contentful "github.com/regressivetech/contentful-go"
 )
+
+const envID = "staging"
 
 func TestAccContentfulContentType_Basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
@@ -31,14 +33,9 @@ func TestAccContentfulContentType_Basic(t *testing.T) {
 					"contentful_contenttype.mylinked_contenttype", "name", "tf_linked"),
 			},
 			{
-				Config: testAccContentfulContentTypeUpdateConfig,
+				Config: testAccContentfulContentTypeWithID,
 				Check: resource.TestCheckResourceAttr(
-					"contentful_configtype.content_type_with_id", "id", "contentTypeWithID"),
-			},
-			{
-				Config: testAccContentfulContentTypeUpdateConfig,
-				Check: resource.TestCheckResourceAttr(
-					"contentful_contenttype.content_type_with_env", "environment", "my_env"),
+					"contentful_contenttype.content_type_with_id", "name", "tf_test_with_id"),
 			},
 		},
 	})
@@ -164,29 +161,27 @@ resource "contentful_contenttype" "mycontenttype" {
 	env_id = "` + envID + `"
   name = "tf_test1"
   description = "Terraform Acc Test Content Type description change"
-  display_field = "field1"
+	display_field = "field1"
   field {
-	disabled  = false
-	id        = "field1"
-	localized = false
-	name      = "Field 1 name change"
-	omitted   = false
-	required  = true
-	type      = "Text"
+		disabled  = false
+		id        = "field1"
+		localized = false
+		name      = "Field 1 name change"
+		omitted   = false
+		required  = true
+		type      = "Text"
   }
   field {
-	disabled  = false
-	id        = "field3"
-	localized = false
-	name      = "Field 3 new field"
-	omitted   = false
-	required  = true
-	type      = "Integer"
+		disabled  = false
+		id        = "field3"
+		localized = false
+		name      = "Field 3 new field"
+		omitted   = false
+		required  = true
+		type      = "Integer"
   }	
 }
 `
-
-var envID = "env_id"
 
 var testAccContentfulContentTypeLinkConfig = `
 resource "contentful_contenttype" "mycontenttype" {
@@ -195,23 +190,24 @@ resource "contentful_contenttype" "mycontenttype" {
   name = "tf_test1"
   description = "Terraform Acc Test Content Type description change"
   display_field = "field1"
+	content_type_id = "tf_test1"
   field {
-	disabled  = false
-	id        = "field1"
-	localized = false
-	name      = "Field 1 name change"
-	omitted   = false
-	required  = true
-	type      = "Text"
+		disabled  = false
+		id        = "field1"
+		localized = false
+		name      = "Field 1 name change"
+		omitted   = false
+		required  = true
+		type      = "Text"
   }
   field {
-	disabled  = false
-	id        = "field3"
-	localized = false
-	name      = "Field 3 new field"
-	omitted   = false
-	required  = true
-	type      = "Integer"
+		disabled  = false
+		id        = "field3"
+		localized = false
+		name      = "Field 3 new field"
+		omitted   = false
+		required  = true
+		type      = "Integer"
   }	
 }
 
@@ -220,8 +216,8 @@ resource "contentful_contenttype" "mylinked_contenttype" {
 	env_id = "` + envID + `"
   name          = "tf_linked"
   description   = "Terraform Acc Test Content Type with links"
-  display_field = "asset_field"
-  field {
+  display_field = "entry_link_field"
+	field {
     id   = "asset_field"
     name = "Asset Field"
     type = "Array"
@@ -231,73 +227,48 @@ resource "contentful_contenttype" "mylinked_contenttype" {
     }
     required = true
   }
-  field {
+	field {
     id        = "entry_link_field"
     name      = "Entry Link Field"
     type      = "Link"
     link_type = "Entry"
     validations = [
-	  jsonencode({
-		linkContentType = [
-          contentful_contenttype.mycontenttype.id
+			jsonencode({
+				linkContentType = [
+					"tf_test1"
+				]
+			})
 		]
-	  })
-	]
     required = false
   }
 }
+`
 
+var testAccContentfulContentTypeWithID = `
 resource "contentful_contenttype" "content_type_with_id" {
   space_id = "` + spaceID + `"
 	env_id = "` + envID + `"
   name = "tf_test_with_id"
   description = "Content Type with ID"
-  display_field = "fieldWithID"
 	content_type_id = "contentTypeWithID"
+  display_field = "field1"
   field {
-	disabled  = false
-	id        = "field1"
-	localized = false
-	name      = "Field 1 name"
-	omitted   = false
-	required  = true
-	type      = "Text"
-  }
-  field {
-	disabled  = false
-	id        = "field2"
-	localized = false
-	name      = "Field 2 name"
-	omitted   = false
-	required  = true
-	type      = "Integer"
-  }	
-}
-
-resource "contentful_contenttype" "content_type_with_env" {
-  space_id = "` + spaceID + `"
-	env_id = "` + envID + `"
-  name = "tf_test_with_id"
-  description = "Content Type with ID"
-  display_field = "fieldWithID"
-	environment = "my_env"
-  field {
-	disabled  = false
-	id        = "field1"
-	localized = false
-	name      = "Field 1 name"
-	omitted   = false
-	required  = true
-	type      = "Text"
-  }
-  field {
-	disabled  = false
-	id        = "field2"
-	localized = false
-	name      = "Field 2 name"
-	omitted   = false
-	required  = true
-	type      = "Integer"
+		disabled  = false
+		id        = "field1"
+		localized = false
+		name      = "Field 1 name"
+		omitted   = false
+		required  = true
+		type      = "Text"
+	}
+	field {
+		disabled  = false
+		id        = "field2"
+		localized = false
+		name      = "Field 2 name"
+		omitted   = false
+		required  = true
+		type      = "Integer"
   }	
 }
 `

@@ -1,8 +1,10 @@
 package contentful
 
 import (
+	"errors"
+
 	"github.com/hashicorp/terraform/helper/schema"
-	contentful "github.com/labd/contentful-go"
+	contentful "github.com/regressivetech/contentful-go"
 )
 
 func resourceContentfulContentType() *schema.Resource {
@@ -41,6 +43,7 @@ func resourceContentfulContentType() *schema.Resource {
 			"env_id": {
 				Type:     schema.TypeString,
 				Required: true,
+				ForceNew: true,
 			},
 			"field": {
 				Type:     schema.TypeList,
@@ -126,6 +129,9 @@ func resourceContentTypeCreate(d *schema.ResourceData, m interface{}) (err error
 		Name:         d.Get("name").(string),
 		DisplayField: d.Get("display_field").(string),
 		Fields:       []*contentful.Field{},
+		Sys: &contentful.Sys{
+			ID: d.Get("content_type_id").(string),
+		},
 	}
 
 	id := d.Get("content_type_id")
@@ -140,6 +146,10 @@ func resourceContentTypeCreate(d *schema.ResourceData, m interface{}) (err error
 
 	if err != nil {
 		return err
+	}
+
+	if env == nil {
+		return errors.New("Unable to get environment " + envID)
 	}
 
 	if description, ok := d.GetOk("description"); ok {
@@ -180,7 +190,7 @@ func resourceContentTypeCreate(d *schema.ResourceData, m interface{}) (err error
 		ct.Fields = append(ct.Fields, contentfulField)
 	}
 
-	if err = client.ContentTypes.UpsertEnv(env, ct); err != nil {
+	if err = client.ContentTypes.Upsert(env, ct); err != nil {
 		return err
 	}
 
@@ -188,7 +198,7 @@ func resourceContentTypeCreate(d *schema.ResourceData, m interface{}) (err error
 		return err
 	}
 
-	if err = client.ContentTypes.Activate(env.Sys.Space.Sys.ID, ct); err != nil {
+	if err = client.ContentTypes.Activate(env, ct); err != nil {
 		return err
 	}
 
@@ -210,7 +220,7 @@ func resourceContentTypeRead(d *schema.ResourceData, m interface{}) (err error) 
 	if err != nil {
 		return err
 	}
-	_, err = client.ContentTypes.GetFromEnv(env, d.Id())
+	_, err = client.ContentTypes.Get(env, d.Id())
 	return err
 }
 
@@ -227,7 +237,7 @@ func resourceContentTypeUpdate(d *schema.ResourceData, m interface{}) (err error
 		return err
 	}
 
-	ct, err := client.ContentTypes.GetFromEnv(env, d.Id())
+	ct, err := client.ContentTypes.Get(env, d.Id())
 	if err != nil {
 		return err
 	}
@@ -254,23 +264,22 @@ func resourceContentTypeUpdate(d *schema.ResourceData, m interface{}) (err error
 	// To remove a field from a content type 4 API calls need to be made.
 	// Omit the removed fields and publish the new version of the content type,
 	// followed by the field removal and final publish.
-	if err = client.ContentTypes.UpsertEnv(env, ct); err != nil {
+	if err = client.ContentTypes.Upsert(env, ct); err != nil {
 		return err
 	}
 
-	if err = client.ContentTypes.Activate(env.Sys.Space.Sys.ID, ct); err != nil {
+	if err = client.ContentTypes.Activate(env, ct); err != nil {
 		return err
 	}
 
 	if deletedFields != nil {
 		ct.Fields = existingFields
 
-		if err = client.ContentTypes.UpsertEnv(env, ct); err != nil {
+		if err = client.ContentTypes.Upsert(env, ct); err != nil {
 			return err
 		}
 
-		// TODO: Update to use environment
-		if err = client.ContentTypes.Activate(env.Sys.Space.Sys.ID, ct); err != nil {
+		if err = client.ContentTypes.Activate(env, ct); err != nil {
 			return err
 		}
 	}
@@ -285,17 +294,16 @@ func resourceContentTypeDelete(d *schema.ResourceData, m interface{}) (err error
 
 	env, err := client.Environments.Get(spaceID, envID)
 
-	ct, err := client.ContentTypes.GetFromEnv(env, d.Id())
+	ct, err := client.ContentTypes.Get(env, d.Id())
 	if err != nil {
 		return err
 	}
 
-	// TODO: Update to use environment
-	if err = client.ContentTypes.Deactivate(env.Sys.Space.Sys.ID, ct); err != nil {
+	if err = client.ContentTypes.Deactivate(env, ct); err != nil {
 		return err
 	}
 
-	if err = client.ContentTypes.DeleteFromEnv(env, ct); err != nil {
+	if err = client.ContentTypes.Delete(env, ct); err != nil {
 		return err
 	}
 
