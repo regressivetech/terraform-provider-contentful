@@ -2,7 +2,7 @@ package contentful
 
 import (
 	"github.com/hashicorp/terraform/helper/schema"
-	contentful "github.com/labd/contentful-go"
+	contentful "github.com/regressivetech/contentful-go"
 )
 
 func resourceContentfulEnvironment() *schema.Resource {
