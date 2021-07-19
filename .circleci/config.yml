@@ -19,9 +19,9 @@ jobs:
             - "/go/pkg/mod"
       - run:
           name: Test
-          command: |
-            export TF_ACC=1
-            go test -race -coverprofile=coverage.txt -covermode=atomic -coverpkg=./contentful -v ./contentful
+          command:
+            # Run tests with parallelism of 1 as operations on contentful can conflict with each other
+            TF_ACC=1 go test -p=1 -race -coverprofile=coverage.txt -covermode=atomic -coverpkg=./contentful -v ./contentful
       - run:
           name: Coverage
           command: bash <(curl -s https://codecov.io/bash) -t $CODECOV_TOKEN
