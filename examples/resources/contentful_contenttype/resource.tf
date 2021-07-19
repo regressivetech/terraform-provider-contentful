@@ -1,8 +1,11 @@
 resource "contentful_contenttype" "example_contenttype" {
-  space_id = "space-id"
-  name          = "tf_linked"
-  description   = "content type description"
-  display_field = "asset_field"
+  space_id        = "space-id"
+  name            = "tf_linked"
+  description     = "content type description"
+  display_field   = "asset_field"
+  content_type_id = "exampleContentType"
+  env_id          = "environment-name"
+
   field {
     id   = "asset_field"
     name = "Asset Field"
