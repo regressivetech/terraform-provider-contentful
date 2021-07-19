@@ -11,9 +11,9 @@ workflows:
       - github_deploy:
           filters:
             branches:
-              ignore: /.*/
-            tags:
-              only: /^v\d*\.\d*\.\d*\.$/
+              only: chore/release_workflow
+                # tags:
+                #   only: /^v\d*\.\d*\.\d*\.$/
           requires:
             - install
           context:
