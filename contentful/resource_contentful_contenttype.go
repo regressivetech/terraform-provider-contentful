@@ -78,7 +78,7 @@ func resourceContentfulContentType() *schema.Resource {
 									},
 									"link_type": {
 										Type:     schema.TypeString,
-										Required: true,
+										Optional: true,
 									},
 									"validations": {
 										Type:     schema.TypeList,
@@ -143,7 +143,6 @@ func resourceContentTypeCreate(d *schema.ResourceData, m interface{}) (err error
 	}
 
 	env, err := client.Environments.Get(spaceID, envID)
-
 	if err != nil {
 		return err
 	}
@@ -216,7 +215,6 @@ func resourceContentTypeRead(d *schema.ResourceData, m interface{}) (err error) 
 	spaceID := d.Get("space_id").(string)
 	envID := d.Get("env_id").(string)
 	env, err := client.Environments.Get(spaceID, envID)
-
 	if err != nil {
 		return err
 	}
@@ -311,7 +309,6 @@ func resourceContentTypeDelete(d *schema.ResourceData, m interface{}) (err error
 }
 
 func setContentTypeProperties(d *schema.ResourceData, ct *contentful.ContentType) (err error) {
-
 	if err = d.Set("version", ct.Sys.Version); err != nil {
 		return err
 	}
