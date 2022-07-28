@@ -28,5 +28,9 @@ jobs:
         go mod download
 
     - name: Test
+      env:
+        CONTENTFUL_MANAGEMENT_TOKEN: ${{ secrets.CONTENTFUL_MANAGEMENT_TOKEN }}
+        CONTENTFUL_ORGANIZATION_ID: ${{ secrets.CONTENTFUL_ORGANIZATION_ID }}
+        SPACE_ID: ${{ secrets.SPACE_ID }}
       run: |
         make testacc
