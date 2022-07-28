@@ -66,7 +66,6 @@ func testAccCheckContentfulAssetExists(n string, asset *contentful.Asset) resour
 
 func testAccCheckContentfulAssetAttributes(asset *contentful.Asset, attrs map[string]interface{}) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-
 		spaceIDCheck := attrs["space_id"].(string)
 		if asset.Sys.Space.Sys.ID != spaceIDCheck {
 			return fmt.Errorf("space id  does not match: %s, %s", asset.Sys.Space.Sys.ID, spaceIDCheck)
