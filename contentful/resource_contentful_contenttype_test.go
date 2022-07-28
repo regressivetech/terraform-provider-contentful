@@ -4,12 +4,10 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	contentful "github.com/regressivetech/contentful-go"
 )
-
-const envID = "staging"
 
 func TestAccContentfulContentType_Basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
@@ -179,7 +177,7 @@ resource "contentful_contenttype" "mycontenttype" {
 		omitted   = false
 		required  = true
 		type      = "Integer"
-  }	
+  }
 }
 `
 
@@ -208,7 +206,7 @@ resource "contentful_contenttype" "mycontenttype" {
 		omitted   = false
 		required  = true
 		type      = "Integer"
-  }	
+  }
 }
 
 resource "contentful_contenttype" "mylinked_contenttype" {
@@ -269,6 +267,6 @@ resource "contentful_contenttype" "content_type_with_id" {
 		omitted   = false
 		required  = true
 		type      = "Integer"
-  }	
+  }
 }
 `
