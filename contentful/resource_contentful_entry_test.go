@@ -81,7 +81,6 @@ func testAccCheckContentfulEntryExists(n string, entry *contentful.Entry) resour
 
 func testAccCheckContentfulEntryAttributes(entry *contentful.Entry, attrs map[string]interface{}) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-
 		spaceIDCheck := attrs["space_id"].(string)
 		if entry.Sys.Space.Sys.ID != spaceIDCheck {
 			return fmt.Errorf("space id  does not match: %s, %s", entry.Sys.Space.Sys.ID, spaceIDCheck)
