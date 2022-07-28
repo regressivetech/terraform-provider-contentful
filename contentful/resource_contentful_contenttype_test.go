@@ -9,7 +9,7 @@ import (
 	contentful "github.com/regressivetech/contentful-go"
 )
 
-const envID = "staging"
+const envID = "master"
 
 func TestAccContentfulContentType_Basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
@@ -179,7 +179,7 @@ resource "contentful_contenttype" "mycontenttype" {
 		omitted   = false
 		required  = true
 		type      = "Integer"
-  }	
+  }
 }
 `
 
@@ -208,7 +208,7 @@ resource "contentful_contenttype" "mycontenttype" {
 		omitted   = false
 		required  = true
 		type      = "Integer"
-  }	
+  }
 }
 
 resource "contentful_contenttype" "mylinked_contenttype" {
@@ -269,6 +269,6 @@ resource "contentful_contenttype" "content_type_with_id" {
 		omitted   = false
 		required  = true
 		type      = "Integer"
-  }	
+  }
 }
 `
