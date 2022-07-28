@@ -20,6 +20,8 @@ jobs:
       id: go
 
     - uses: goreleaser/goreleaser-action@v2
+      env:
+        PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
       with:
         version: latest
         args: release --rm-dist
