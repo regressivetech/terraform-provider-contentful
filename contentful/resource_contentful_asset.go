@@ -2,7 +2,6 @@ package contentful
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	contentful "github.com/regressivetech/contentful-go"
@@ -241,7 +240,11 @@ func resourceUpdateAsset(d *schema.ResourceData, m interface{}) (err error) {
 		localizedDescription[field["locale"].(string)] = field["content"].(string)
 	}
 
-	file := fields["file"].(map[string]interface{})
+	files := fields["file"].(*schema.Set).List()
+	if len(files) != 1 {
+		return fmt.Errorf("file should be single item")
+	}
+	file := files[0].(map[string]interface{})
 
 	asset = &contentful.Asset{
 		Sys: &contentful.Sys{
@@ -254,8 +257,8 @@ func resourceUpdateAsset(d *schema.ResourceData, m interface{}) (err error) {
 			Description: localizedDescription,
 			File: map[string]*contentful.File{
 				d.Get("locale").(string): {
-					FileName:    file["fileName"].(string),
-					ContentType: file["contentType"].(string),
+					FileName:    file["file_name"].(string),
+					ContentType: file["content_type"].(string),
 				},
 			},
 		},
@@ -278,7 +281,6 @@ func resourceUpdateAsset(d *schema.ResourceData, m interface{}) (err error) {
 		return err
 	}
 
-	fmt.Fprintln(os.Stderr, asset.Sys)
 	err = client.Assets.Process(d.Get("space_id").(string), asset)
 	if err != nil {
 		return err
