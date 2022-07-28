@@ -4,12 +4,10 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	contentful "github.com/regressivetech/contentful-go"
 )
-
-const envID = "master"
 
 func TestAccContentfulContentType_Basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{

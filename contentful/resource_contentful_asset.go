@@ -1,7 +1,10 @@
 package contentful
 
 import (
-	"github.com/hashicorp/terraform/helper/schema"
+	"fmt"
+	"os"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	contentful "github.com/regressivetech/contentful-go"
 )
 
@@ -67,7 +70,7 @@ func resourceContentfulAsset() *schema.Resource {
 							},
 						},
 						"file": {
-							Type:     schema.TypeMap,
+							Type:     schema.TypeSet,
 							Required: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
@@ -107,15 +110,11 @@ func resourceContentfulAsset() *schema.Resource {
 											},
 										},
 									},
-									"uploadFrom": {
+									"file_name": {
 										Type:     schema.TypeString,
-										Computed: true,
+										Optional: true,
 									},
-									"fileName": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"contentType": {
+									"content_type": {
 										Type:     schema.TypeString,
 										Required: true,
 									},
@@ -156,7 +155,11 @@ func resourceCreateAsset(d *schema.ResourceData, m interface{}) (err error) {
 		localizedDescription[field["locale"].(string)] = field["content"].(string)
 	}
 
-	file := fields["file"].(map[string]interface{})
+	files := fields["file"].(*schema.Set).List()
+	if len(files) != 1 {
+		return fmt.Errorf("file should be single item")
+	}
+	file := files[0].(map[string]interface{})
 
 	asset := &contentful.Asset{
 		Sys: &contentful.Sys{
@@ -169,8 +172,8 @@ func resourceCreateAsset(d *schema.ResourceData, m interface{}) (err error) {
 			Description: localizedDescription,
 			File: map[string]*contentful.File{
 				d.Get("locale").(string): {
-					FileName:    file["fileName"].(string),
-					ContentType: file["contentType"].(string),
+					FileName:    file["file_name"].(string),
+					ContentType: file["content_type"].(string),
 				},
 			},
 		},
@@ -184,12 +187,8 @@ func resourceCreateAsset(d *schema.ResourceData, m interface{}) (err error) {
 		asset.Fields.File[d.Get("locale").(string)].UploadURL = upload
 	}
 
-	if details, ok := file["fileDetails"].(*contentful.FileDetails); ok {
+	if details, ok := file["details"].(*contentful.FileDetails); ok {
 		asset.Fields.File[d.Get("locale").(string)].Details = details
-	}
-
-	if uploadFrom, ok := file["uploadFrom"].(string); ok {
-		asset.Fields.File[d.Get("locale").(string)].UploadFrom.Sys.ID = uploadFrom
 	}
 
 	err = client.Assets.Upsert(d.Get("space_id").(string), asset)
@@ -270,12 +269,8 @@ func resourceUpdateAsset(d *schema.ResourceData, m interface{}) (err error) {
 		asset.Fields.File[d.Get("locale").(string)].UploadURL = upload
 	}
 
-	if details, ok := file["fileDetails"].(*contentful.FileDetails); ok {
+	if details, ok := file["file_details"].(*contentful.FileDetails); ok {
 		asset.Fields.File[d.Get("locale").(string)].Details = details
-	}
-
-	if uploadFrom, ok := file["uploadFrom"].(string); ok {
-		asset.Fields.File[d.Get("locale").(string)].UploadFrom.Sys.ID = uploadFrom
 	}
 
 	err = client.Assets.Upsert(d.Get("space_id").(string), asset)
@@ -283,6 +278,7 @@ func resourceUpdateAsset(d *schema.ResourceData, m interface{}) (err error) {
 		return err
 	}
 
+	fmt.Fprintln(os.Stderr, asset.Sys)
 	err = client.Assets.Process(d.Get("space_id").(string), asset)
 	if err != nil {
 		return err
