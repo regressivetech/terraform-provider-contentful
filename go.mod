@@ -1,6 +1,6 @@
 module github.com/regressivetech/terraform-provider-contentful
 
-go 1.14
+go 1.16
 
 require (
 	github.com/hashicorp/terraform v0.12.24
