@@ -32,5 +32,6 @@ jobs:
         CONTENTFUL_MANAGEMENT_TOKEN: ${{ secrets.CONTENTFUL_MANAGEMENT_TOKEN }}
         CONTENTFUL_ORGANIZATION_ID: ${{ secrets.CONTENTFUL_ORGANIZATION_ID }}
         SPACE_ID: ${{ secrets.SPACE_ID }}
+        ENV_ID: ${{ secrets.ENV_ID }}
       run: |
         make testacc
