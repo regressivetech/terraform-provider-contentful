@@ -29,4 +29,4 @@ jobs:
 
     - name: Test
       run: |
-        go test ./...
+        make testacc
