@@ -7,7 +7,7 @@ import (
 )
 
 var (
-	testAccProviders map[string]*schema.Provider
+	testAccProviders map[string]terraform.ResourceProvider
 	testAccProvider  *schema.Provider
 )
 
