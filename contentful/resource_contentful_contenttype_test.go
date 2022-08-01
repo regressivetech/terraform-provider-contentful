@@ -39,6 +39,24 @@ func TestAccContentfulContentType_Basic(t *testing.T) {
 	})
 }
 
+func TestAccContentfulContentType_TypeChanged(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckContentfulContentTypeDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContentfulContentTypeConfig,
+				Check:  resource.TestCheckResourceAttr("contentful_contenttype.mycontenttype", "name", "tf_test1"),
+			},
+			{
+				Config: testAccContentfulContentTypeUpdateFieldType,
+				Check:  resource.TestCheckResourceAttr("contentful_contenttype.mycontenttype", "name", "tf_test1"),
+			},
+		},
+	})
+}
+
 // noinspection GoUnusedFunction
 func testAccCheckContentfulContentTypeExists(n string, contentType *contentful.ContentType) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
@@ -127,40 +145,40 @@ func testAccCheckContentfulContentTypeDestroy(s *terraform.State) (err error) {
 
 var testAccContentfulContentTypeConfig = `
 resource "contentful_contenttype" "mycontenttype" {
-  space_id = "` + spaceID + `"
+	space_id = "` + spaceID + `"
 	env_id = "` + envID + `"
-  name = "tf_test1"
-  description = "Terraform Acc Test Content Type"
-  display_field = "field1"
-  field {
-	disabled  = false
-	id        = "field1"
-	localized = false
-	name      = "Field 1"
-	omitted   = false
-	required  = true
-	type      = "Text"
-  }
-  field {
-	disabled  = false
-	id        = "field2"
-	localized = false
-	name      = "Field 2"
-	omitted   = false
-	required  = true
-	type      = "Integer"
-  }
+	name = "tf_test1"
+	description = "Terraform Acc Test Content Type"
+	display_field = "field1"
+	field {
+		disabled  = false
+		id        = "field1"
+		localized = false
+		name      = "Field 1"
+		omitted   = false
+		required  = true
+		type      = "Text"
+	}
+	field {
+		disabled  = false
+		id        = "field2"
+		localized = false
+		name      = "Field 2"
+		omitted   = false
+		required  = true
+		type      = "Integer"
+	}
 }
 `
 
 var testAccContentfulContentTypeUpdateConfig = `
 resource "contentful_contenttype" "mycontenttype" {
-  space_id = "` + spaceID + `"
+	space_id = "` + spaceID + `"
 	env_id = "` + envID + `"
-  name = "tf_test1"
-  description = "Terraform Acc Test Content Type description change"
+	name = "tf_test1"
+	description = "Terraform Acc Test Content Type description change"
 	display_field = "field1"
-  field {
+	field {
 		disabled  = false
 		id        = "field1"
 		localized = false
@@ -168,8 +186,8 @@ resource "contentful_contenttype" "mycontenttype" {
 		omitted   = false
 		required  = true
 		type      = "Text"
-  }
-  field {
+	}
+	field {
 		disabled  = false
 		id        = "field3"
 		localized = false
@@ -177,19 +195,19 @@ resource "contentful_contenttype" "mycontenttype" {
 		omitted   = false
 		required  = true
 		type      = "Integer"
-  }
+	}
 }
 `
 
 var testAccContentfulContentTypeLinkConfig = `
 resource "contentful_contenttype" "mycontenttype" {
-  space_id = "` + spaceID + `"
+	space_id = "` + spaceID + `"
 	env_id = "` + envID + `"
-  name = "tf_test1"
-  description = "Terraform Acc Test Content Type description change"
-  display_field = "field1"
+	name = "tf_test1"
+	description = "Terraform Acc Test Content Type description change"
+	display_field = "field1"
 	content_type_id = "tf_test1"
-  field {
+	field {
 		disabled  = false
 		id        = "field1"
 		localized = false
@@ -197,8 +215,8 @@ resource "contentful_contenttype" "mycontenttype" {
 		omitted   = false
 		required  = true
 		type      = "Text"
-  }
-  field {
+	}
+	field {
 		disabled  = false
 		id        = "field3"
 		localized = false
@@ -206,51 +224,51 @@ resource "contentful_contenttype" "mycontenttype" {
 		omitted   = false
 		required  = true
 		type      = "Integer"
-  }
+	}
 }
 
 resource "contentful_contenttype" "mylinked_contenttype" {
-  space_id = "` + spaceID + `"
+	space_id = "` + spaceID + `"
 	env_id = "` + envID + `"
-  name          = "tf_linked"
-  description   = "Terraform Acc Test Content Type with links"
-  display_field = "entry_link_field"
+	name          = "tf_linked"
+	description   = "Terraform Acc Test Content Type with links"
+	display_field = "entry_link_field"
 	field {
-    id   = "asset_field"
-    name = "Asset Field"
-    type = "Array"
-    items {
-      type      = "Link"
-      link_type = "Asset"
-    }
-    required = true
-  }
+	  id   = "asset_field"
+	  name = "Asset Field"
+	  type = "Array"
+	  items {
+	    type      = "Link"
+	    link_type = "Asset"
+	  }
+	  required = true
+	}
 	field {
-    id        = "entry_link_field"
-    name      = "Entry Link Field"
-    type      = "Link"
-    link_type = "Entry"
-    validations = [
+	  id        = "entry_link_field"
+	  name      = "Entry Link Field"
+	  type      = "Link"
+	  link_type = "Entry"
+	  validations = [
 			jsonencode({
 				linkContentType = [
 					"tf_test1"
 				]
 			})
 		]
-    required = false
-  }
+	  required = false
+	}
 }
 `
 
 var testAccContentfulContentTypeWithID = `
 resource "contentful_contenttype" "content_type_with_id" {
-  space_id = "` + spaceID + `"
+	space_id = "` + spaceID + `"
 	env_id = "` + envID + `"
-  name = "tf_test_with_id"
-  description = "Content Type with ID"
+	name = "tf_test_with_id"
+	description = "Content Type with ID"
 	content_type_id = "contentTypeWithID"
-  display_field = "field1"
-  field {
+	display_field = "field1"
+	field {
 		disabled  = false
 		id        = "field1"
 		localized = false
@@ -267,6 +285,34 @@ resource "contentful_contenttype" "content_type_with_id" {
 		omitted   = false
 		required  = true
 		type      = "Integer"
-  }
+	}
+}
+`
+
+var testAccContentfulContentTypeUpdateFieldType = `
+resource "contentful_contenttype" "mycontenttype" {
+	space_id = "` + spaceID + `"
+	env_id = "` + envID + `"
+	name = "tf_test1"
+	description = "Terraform Acc Test Content Type"
+	display_field = "field1"
+	field {
+		disabled  = false
+		id        = "field1"
+		localized = false
+		name      = "Field 1"
+		omitted   = false
+		required  = true
+		type      = "Text"
+	}
+	field {
+		disabled  = false
+		id        = "field2"
+		localized = false
+		name      = "Field 2"
+		omitted   = false
+		required  = true
+		type      = "Symbol" // This field is changed
+	}
 }
 `

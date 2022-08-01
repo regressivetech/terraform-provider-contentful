@@ -35,3 +35,17 @@ jobs:
         ENV_ID: ${{ secrets.ENV_ID }}
       run: |
         make testacc
+
+    - name: Convert coverage to lcov
+      uses: jandelgado/gcov2lcov-action@v1.0.0
+      if: github.ref == 'refs/heads/main'
+      with:
+        infile: cover.out
+        outfile: cover.lcov
+
+    - name: Coveralls
+      uses: coverallsapp/github-action@master
+      if: github.ref == 'refs/heads/main'
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        path-to-lcov: cover.lcov

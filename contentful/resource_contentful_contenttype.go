@@ -189,15 +189,7 @@ func resourceContentTypeCreate(d *schema.ResourceData, m interface{}) (err error
 		ct.Fields = append(ct.Fields, contentfulField)
 	}
 
-	if err = client.ContentTypes.Upsert(env, ct); err != nil {
-		return err
-	}
-
-	if err != nil {
-		return err
-	}
-
-	if err = client.ContentTypes.Activate(env, ct); err != nil {
+	if err = upsertAndActivate(client, env, ct); err != nil {
 		return err
 	}
 
@@ -223,9 +215,6 @@ func resourceContentTypeRead(d *schema.ResourceData, m interface{}) (err error) 
 }
 
 func resourceContentTypeUpdate(d *schema.ResourceData, m interface{}) (err error) {
-	var existingFields []*contentful.Field
-	var deletedFields []*contentful.Field
-
 	client := m.(*contentful.Client)
 	spaceID := d.Get("space_id").(string)
 	envID := d.Get("env_id").(string)
@@ -250,39 +239,41 @@ func resourceContentTypeUpdate(d *schema.ResourceData, m interface{}) (err error
 	if d.HasChange("field") {
 		old, nw := d.GetChange("field")
 
-		existingFields, deletedFields = checkFieldChanges(old.([]interface{}), nw.([]interface{}))
+		firstApplyFields, secondApplyFields, shouldSecondApply := checkFieldsToOmit(old.([]interface{}), nw.([]interface{}))
 
-		ct.Fields = existingFields
-
-		if deletedFields != nil {
-			ct.Fields = append(ct.Fields, deletedFields...)
-		}
-	}
-
-	// To remove a field from a content type 4 API calls need to be made.
-	// Omit the removed fields and publish the new version of the content type,
-	// followed by the field removal and final publish.
-	if err = client.ContentTypes.Upsert(env, ct); err != nil {
-		return err
-	}
-
-	if err = client.ContentTypes.Activate(env, ct); err != nil {
-		return err
-	}
-
-	if deletedFields != nil {
-		ct.Fields = existingFields
-
-		if err = client.ContentTypes.Upsert(env, ct); err != nil {
+		ct.Fields = firstApplyFields
+		// To remove a field from a content type 4 API calls need to be made.
+		// Omit the removed fields and publish the new version of the content type,
+		// followed by the field removal and final publish.
+		if err = upsertAndActivate(client, env, ct); err != nil {
 			return err
 		}
 
-		if err = client.ContentTypes.Activate(env, ct); err != nil {
-			return err
+		if shouldSecondApply {
+			ct.Fields = secondApplyFields
+			if err = upsertAndActivate(client, env, ct); err != nil {
+				return err
+			}
 		}
+	}
+
+	ct.Fields = newFields(d.Get("field").([]interface{}))
+	if err = upsertAndActivate(client, env, ct); err != nil {
+		return err
 	}
 
 	return setContentTypeProperties(d, ct)
+}
+
+func upsertAndActivate(client *contentful.Client, env *contentful.Environment, ct *contentful.ContentType) error {
+	if err := client.ContentTypes.Upsert(env, ct); err != nil {
+		return err
+	}
+
+	if err := client.ContentTypes.Activate(env, ct); err != nil {
+		return err
+	}
+	return nil
 }
 
 func resourceContentTypeDelete(d *schema.ResourceData, m interface{}) (err error) {
@@ -316,42 +307,73 @@ func setContentTypeProperties(d *schema.ResourceData, ct *contentful.ContentType
 	return nil
 }
 
-func checkFieldChanges(old, new []interface{}) ([]*contentful.Field, []*contentful.Field) {
-	var contentfulField *contentful.Field
-	var existingFields []*contentful.Field
-	var deletedFields []*contentful.Field
-	var fieldRemoved bool
+// Contentful API should omit the field.
+// And if user want to change field type, user should delete the field completely before user create new field type field.
+func checkFieldsToOmit(oldFields, newFields []interface{}) (firstApplyFields, secondApplyFields []*contentful.Field, shouldSecondApply bool) {
+	getFieldFromID := func(fields []interface{}, id string) (map[string]interface{}, bool) {
+		for _, field := range fields {
+			castedField := field.(map[string]interface{})
+			if castedField["id"].(string) == id {
+				return castedField, true
+			}
+		}
+		return nil, false
+	}
 
-	for i := 0; i < len(old); i++ {
-		oldField := old[i].(map[string]interface{})
+	for i := 0; i < len(oldFields); i++ {
+		oldField := oldFields[i].(map[string]interface{})
 
-		fieldRemoved = true
-		for j := 0; j < len(new); j++ {
-			if oldField["id"].(string) == new[j].(map[string]interface{})["id"].(string) {
-				fieldRemoved = false
-				break
+		newField, ok := getFieldFromID(newFields, oldField["id"].(string))
+
+		toOmitted := false
+		if !ok {
+			// field was deleted
+			toOmitted = true
+		} else {
+			if oldField["type"].(string) != newField["type"].(string) {
+				// field type is changed
+				toOmitted = true
 			}
 		}
 
-		if fieldRemoved {
-			deletedFields = append(deletedFields,
-				&contentful.Field{
-					ID:        oldField["id"].(string),
-					Name:      oldField["name"].(string),
-					Type:      oldField["type"].(string),
-					LinkType:  oldField["link_type"].(string),
-					Localized: oldField["localized"].(bool),
-					Required:  oldField["required"].(bool),
-					Disabled:  oldField["disabled"].(bool),
-					Omitted:   true,
-				})
+		shouldDelete := false
+		if ok {
+			// if field type is changed, should delete field completely
+			if oldField["type"].(string) != newField["type"].(string) {
+				shouldDelete = true
+			}
+		}
+
+		field := &contentful.Field{
+			ID:        oldField["id"].(string),
+			Name:      oldField["name"].(string),
+			Type:      oldField["type"].(string),
+			LinkType:  oldField["link_type"].(string),
+			Localized: oldField["localized"].(bool),
+			Required:  oldField["required"].(bool),
+			Disabled:  oldField["disabled"].(bool),
+			Omitted:   oldField["omitted"].(bool),
+		}
+		if toOmitted {
+			field.Omitted = true
+		}
+
+		firstApplyFields = append(firstApplyFields, field)
+		if !shouldDelete {
+			secondApplyFields = append(secondApplyFields, field)
+		} else {
+			shouldSecondApply = true
 		}
 	}
+	return
+}
 
-	for k := 0; k < len(new); k++ {
-		newField := new[k].(map[string]interface{})
+func newFields(newFields []interface{}) []*contentful.Field {
+	result := make([]*contentful.Field, len(newFields))
+	for i := 0; i < len(newFields); i++ {
+		newField := newFields[i].(map[string]interface{})
 
-		contentfulField = &contentful.Field{
+		contentfulField := &contentful.Field{
 			ID:        newField["id"].(string),
 			Name:      newField["name"].(string),
 			Type:      newField["type"].(string),
@@ -375,10 +397,9 @@ func checkFieldChanges(old, new []interface{}) ([]*contentful.Field, []*contentf
 			contentfulField.Items = items
 		}
 
-		existingFields = append(existingFields, contentfulField)
+		result[i] = contentfulField
 	}
-
-	return existingFields, deletedFields
+	return result
 }
 
 func processItems(fieldItems []interface{}) *contentful.FieldTypeArrayItem {

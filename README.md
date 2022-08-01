@@ -1,6 +1,6 @@
-![Go](https://github.com/regressivetech/terraform-provider-contentful/workflows/Go/badge.svg?branch=master)
-[![codecov](https://codecov.io/gh/regressivetech/terraform-provider-contentful/branch/master/graph/badge.svg)](https://codecov.io/gh/regressivetech/terraform-provider-contentful)
-[![license](https://img.shields.io/github/license/regressivetech/terraform-provider-contentful.svg)](https://github.com/regressivetech/terraform-provider-contentful/blob/master/LICENSE)
+![Go](https://github.com/kitagry/terraform-provider-contentful/actions/workflows/test.yaml/badge.svg)
+[![codecov](https://coveralls.io/repos/github/kitagry/terraform-provider-contentful/badge.svg?branch=main)](https://coveralls.io/github/kitagry/terraform-provider-contentful?branch=main)
+[![license](https://img.shields.io/github/license/kitagry/terraform-provider-contentful.svg)](https://github.com/kitagry/terraform-provider-contentful/blob/master/LICENSE)
 
 Terraform Provider for [Contentful's](https://www.contentful.com) Content Management API
 
@@ -150,7 +150,7 @@ Julien Fabre: [Writing a Terraform provider](http://blog.jfabre.net/2017/01/22/w
 
 ## Support
 
-If you have a problem with this provider, please file an [issue](https://github.com/regressivetech/terraform-provider-contentful/issues/new) here on Github.
+If you have a problem with this provider, please file an [issue](https://github.com/kitagry/terraform-provider-contentful/issues/new) here on Github.
 
 ## License
 
